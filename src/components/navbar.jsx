@@ -2,204 +2,111 @@ import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
 import AdbIcon from '@mui/icons-material/Adb';
 import WidgetsIcon from '@mui/icons-material/Widgets';
-import Divider from '@mui/material/Divider';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import DownloadIcon from '@mui/icons-material/Download';
 import WindowIcon from '@mui/icons-material/Window';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
-const pages = ['Products', 'Pricing', 'Blog'];
+const academyItems = ['Monografia', 'GitHub'];
+
+const actionItems = [
+  {
+    value: 'Importar',
+    icon: <UploadIcon />,
+    itemsMenu: [
+      { label: 'Importar Grafo', icon: <UploadIcon /> },
+      { label: 'Importar Matriz de Adjacência', icon: <DashboardCustomizeIcon /> },
+    ]
+  },
+  {
+    value: 'Exportar',
+    icon: <DownloadIcon />,
+    itemsMenu: [
+      { label: 'Exportar Grafo', icon: <DownloadIcon /> },
+      { label: 'Exportar Matriz de Adjacência', icon: <WindowIcon /> },
+    ]
+  },
+  {
+    value: 'grafo',
+    icon: <WidgetsIcon />,
+    itemsMenu: [
+      { label: 'Novo Grafo', icon: <AddIcon /> },
+      { label: 'Limpar Canvas', icon: <DeleteOutlineIcon /> },
+    ]
+  },
+]
 
 function Navbar() {
-  // ESTADOS E HANDLERS
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchors, setAnchors] = React.useState({});
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const handleOpen = (event, value) => setAnchors((prev) => ({ ...prev, [value]: event.currentTarget }));
+  const handleClose = (value) => setAnchors((prev) => ({ ...prev, [value]: null }));
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#400404', borderRadius: '10px' }}>
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
+    <AppBar position="static" sx={{ borderRadius: '8px', mb: 2 }}>
+      <Container maxWidth="1980">
+        <Toolbar sx={{ gap: 2 }}>
 
-          {/* DESKTOP */}
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          <AdbIcon />
 
           <Typography
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
+            href="/"
+            sx={{ fontWeight: 900, color: 'white', letterSpacing: '.3rem', textDecoration: 'none' }}
           >
-            LOGO
+            (gr)Aphelios
           </Typography>
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page}
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+
+            {academyItems.map((item) => (
+              <Button key={item} sx={{ color: 'white', letterSpacing: '.1rem' }}>
+                {item}
               </Button>
             ))}
-          </Box>
 
-          {/* MOBILE */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' } }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+            <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255,255,255,0.3)', mx: 1 }} />
 
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+            {actionItems.map((item) => (
+              <React.Fragment key={item.value}>
+                <Button
+                  startIcon={item.icon}
+                  onClick={(e) => handleOpen(e, item.value)}
+                  sx={{ color: 'white', letterSpacing: '.1rem' }}
+                >
+                  {item.value}
+                </Button>
+                <Menu
+                  anchorEl={anchors[item.value]}
+                  open={Boolean(anchors[item.value])}
+                  onClose={() => handleClose(item.value)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  sx={{ mt: '8px' }}
+                >
+                  {item.itemsMenu.map((menuItem) => (
+                    <MenuItem key={menuItem.label} onClick={() => handleClose(item.value)}>
+                      <ListItemIcon>{menuItem.icon}</ListItemIcon>
+                      <Typography>{menuItem.label}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </React.Fragment>
+            ))}
 
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            LOGO
-          </Typography>
-
-          {/* AMBOS - Avatar e Menu de Usuário */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <WidgetsIcon sx={{ fontSize: 32, color: '#FFFFFF' }} />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              <MenuItem onClick={handleCloseUserMenu}>
-                <ListItemIcon>
-                  <AddIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography>Novo Grafo</Typography>
-              </MenuItem>
-
-              <Divider />
-
-              <MenuItem onClick={handleCloseUserMenu}>
-                <ListItemIcon>
-                  <UploadIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography>Importar Grafo</Typography>
-              </MenuItem>
-
-              <MenuItem onClick={handleCloseUserMenu}>
-                <ListItemIcon>
-                  <DownloadIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography>Exportar Grafo</Typography>
-              </MenuItem>
-
-              <Divider />
-
-              <MenuItem onClick={handleCloseUserMenu}>
-                <ListItemIcon>
-                  <DashboardCustomizeIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography>Importar Matriz de Adjacência</Typography>
-              </MenuItem>
-
-              <MenuItem onClick={handleCloseUserMenu}>
-                <ListItemIcon>
-                  <WindowIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography>Exportar Matriz de Adjacência</Typography>
-              </MenuItem>
-
-            </Menu>
           </Box>
 
         </Toolbar>
@@ -207,4 +114,5 @@ function Navbar() {
     </AppBar>
   );
 }
+
 export default Navbar;
