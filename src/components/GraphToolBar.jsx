@@ -1,24 +1,31 @@
-import { Paper, ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material'
+import { Paper, ToggleButtonGroup, ToggleButton } from '@mui/material'
 import NearMeIcon from '@mui/icons-material/NearMe'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import LinearScaleIcon from '@mui/icons-material/LinearScale'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import PanToolIcon from '@mui/icons-material/PanTool'
+import Typography from '@mui/material/Typography';
+import useGraphStore from '../store/GraphStore'
+
 
 const tools = [
-  { value: 'select', label: 'Select', icon: <NearMeIcon /> },
-  { value: 'addNode', label: 'Add Node', icon: <AddCircleOutlineIcon /> },
-  { value: 'addEdge', label: 'Add Edge', icon: <LinearScaleIcon /> },
-  { value: 'delete', label: 'Delete', icon: <DeleteOutlineIcon /> },
-  { value: 'pan', label: 'Pan/Zoom', icon: <PanToolIcon /> },
+  { value: 'select', label: 'Selecionar', icon: <NearMeIcon /> },
+  { value: 'addNode', label: 'Add Nó', icon: <AddCircleOutlineIcon /> },
+  { value: 'addEdge', label: 'Add Aresta', icon: <LinearScaleIcon /> },
+  { value: 'delete', label: 'Remover', icon: <DeleteOutlineIcon /> },
+  { value: 'control', label: 'Controlar', icon: <PanToolIcon /> },
 ]
 
 function GraphToolbar() {
-  const activeTool = 'select' // virá do Zustand futuramente
-  const handleToolChange = (e, newTool) => { } // conectará ao Zustand futuramente
+  const activeTool = useGraphStore((state) => state.activeTool)
+  const setActiveTool = useGraphStore((state) => state.setActiveTool)
+
+  const handleToolChange = (e, newTool) => {
+    if (newTool !== null) setActiveTool(newTool)
+  }
 
   return (
-    <Paper elevation={3} sx={{ width: '6vh', height: '100%', mr: 2,  }}>
+    <Paper elevation={3} sx={{ width: '7vh', height: '100%', mr: 2, }}>
       <ToggleButtonGroup
         orientation="vertical"
         value={activeTool}
@@ -32,11 +39,9 @@ function GraphToolbar() {
         }}
       >
         {tools.map(({ value, label, icon }) => (
-          <Tooltip key={value} title={label} placement="right">
-            <ToggleButton value={value} sx={{ height: '6vh' }}>
-              {icon}
-            </ToggleButton>
-          </Tooltip>
+          <ToggleButton key={value} value={value} sx={{ height: '7vh', flexDirection: 'column', gap: 0.5, textTransform: 'none' }}>
+            {icon}
+          </ToggleButton>
         ))}
       </ToggleButtonGroup>
     </Paper>
