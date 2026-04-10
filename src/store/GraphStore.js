@@ -8,7 +8,7 @@ const useGraphStore = create((set, get) => ({
   directed: false,
   weighted: false,
 
-  // ─── CONTADORES — nunca decrementan, garantem ids únicos ──────────
+  // ─── CONTADORES — nunca decrementam, garantem ids únicos ──────────
   nodeCounter: 0,
   edgeCounter: 0,
 
@@ -24,15 +24,15 @@ const useGraphStore = create((set, get) => ({
 
   // ─── AÇÕES DO GRAFO ───────────────────────────────────────────────
 
-  // adiciona um nó com id único gerado pelo contador
+  // adiciona um nó com id único, posição e label vazio
   addNode: (x, y) => set((state) => ({
-    nodes: [...state.nodes, { id: state.nodeCounter, x, y }],
+    nodes: [...state.nodes, { id: state.nodeCounter, x, y, label: '' }],
     nodeCounter: state.nodeCounter + 1
   })),
 
-  // adiciona uma aresta com id único gerado pelo contador
+  // adiciona uma aresta com id único, peso padrão, sem direção
   addEdge: (sourceId, targetId) => set((state) => ({
-    edges: [...state.edges, { id: state.edgeCounter, source: sourceId, target: targetId, weight: 1 }],
+    edges: [...state.edges, { id: state.edgeCounter, source: sourceId, target: targetId, weight: null, directed: false, orientation: null }],
     edgeCounter: state.edgeCounter + 1
   })),
 
@@ -45,6 +45,16 @@ const useGraphStore = create((set, get) => ({
   // remove uma aresta pelo id
   removeEdge: (id) => set((state) => ({
     edges: state.edges.filter((e) => e.id !== id)
+  })),
+
+  // atualiza o label de um nó pelo id
+  updateNodeLabel: (id, label) => set((state) => ({
+    nodes: state.nodes.map((n) => n.id === id ? { ...n, label } : n)
+  })),
+
+  // atualiza peso, direção e orientação de uma aresta pelo id
+  updateEdge: (id, weight, directed, orientation) => set((state) => ({
+    edges: state.edges.map((e) => e.id === id ? { ...e, weight, directed, orientation } : e)
   })),
 
   // limpa todos os nós e arestas do canvas e reseta os contadores
