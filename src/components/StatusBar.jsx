@@ -1,16 +1,23 @@
-import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-
-const statusItems = [
-  { label: 'Nós', value: 0 },
-  { label: 'Arestas', value: 0 },
-  { label: 'Tipo', value: 'Não Dirigido' },
-  { label: 'Peso', value: 'Não Ponderado' },
-]
+import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Divider from '@mui/material/Divider'
+import useGraphStore from '../store/GraphStore'
 
 function StatusBar() {
+  const nodes = useGraphStore((state) => state.nodes)
+  const edges = useGraphStore((state) => state.edges)
+
+  const isDirected = edges.some(e => e.directed === true)
+  const isWeighted = edges.some(e => e.weight !== null)
+
+  const statusItems = [
+    { label: 'Nós', value: nodes.length },
+    { label: 'Arestas', value: edges.length },
+    { label: 'Tipo', value: isDirected ? 'Dirigido' : 'Não Dirigido' },
+    { label: 'Peso', value: isWeighted ? 'Ponderado' : 'Não Ponderado' },
+  ]
+
   return (
     <Paper
       elevation={3}
@@ -38,4 +45,4 @@ function StatusBar() {
   )
 }
 
-export default StatusBar;
+export default StatusBar

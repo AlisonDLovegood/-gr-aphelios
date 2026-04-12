@@ -30,9 +30,9 @@ const useGraphStore = create((set, get) => ({
     nodeCounter: state.nodeCounter + 1
   })),
 
-  // adiciona uma aresta com id único, peso padrão, sem direção
+  // adiciona uma aresta com id único, peso nulo e não direcionada
   addEdge: (sourceId, targetId) => set((state) => ({
-    edges: [...state.edges, { id: state.edgeCounter, source: sourceId, target: targetId, weight: null, directed: false, orientation: null }],
+    edges: [...state.edges, { id: state.edgeCounter, source: sourceId, target: targetId, weight: null, directed: false }],
     edgeCounter: state.edgeCounter + 1
   })),
 
@@ -52,13 +52,18 @@ const useGraphStore = create((set, get) => ({
     nodes: state.nodes.map((n) => n.id === id ? { ...n, label } : n)
   })),
 
-  // atualiza peso, direção e orientação de uma aresta pelo id
-  updateEdge: (id, weight, directed, orientation) => set((state) => ({
-    edges: state.edges.map((e) => e.id === id ? { ...e, weight, directed, orientation } : e)
+  // atualiza peso e direção de uma aresta pelo id
+  updateEdge: (id, weight, directed) => set((state) => ({
+    edges: state.edges.map((e) => e.id === id ? { ...e, weight, directed } : e)
   })),
 
   // limpa todos os nós e arestas do canvas e reseta os contadores
   clearCanvas: () => set({ nodes: [], edges: [], nodeCounter: 0, edgeCounter: 0 }),
+
+  // atualiza a posição x,y de um nó pelo id
+  moveNode: (id, x, y) => set((state) => ({
+    nodes: state.nodes.map((n) => n.id === id ? { ...n, x, y } : n)
+  })),
 
   // ─── AÇÕES DA TOOLBAR ─────────────────────────────────────────────
 
