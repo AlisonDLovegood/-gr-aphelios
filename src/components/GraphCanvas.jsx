@@ -21,6 +21,11 @@ function GraphCanvas() {
   const updateNodeLabel = useGraphStore((state) => state.updateNodeLabel)
   const updateEdge = useGraphStore((state) => state.updateEdge)
   const moveNode = useGraphStore((state) => state.moveNode)
+  const setStartNode = useGraphStore((state) => state.setStartNode)
+  const startNode = useGraphStore((state) => state.startNode)
+  const steps = useGraphStore((state) => state.steps)
+  const currentStep = useGraphStore((state) => state.currentStep)
+  const isRunning = useGraphStore((state) => state.isRunning)
 
   const containerRef = useRef(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
@@ -33,7 +38,6 @@ function GraphCanvas() {
   const [edgeWeight, setEdgeWeight] = useState(null)
   const [edgeDirected, setEdgeDirected] = useState(false)
   const [isSelfLoopEdge, setIsSelfLoopEdge] = useState(false)
-
 
   // ─── HANDLERS ─────────────────────────────────────────────────────
 
@@ -68,8 +72,6 @@ function GraphCanvas() {
       if (sourceNode === null) {
         setSourceNode(nodeId)
       } else {
-        // permite múltiplas arestas entre nós diferentes
-        // bloqueia apenas self-loop duplicado
         const isSelfLoopDuplicate = sourceNode === nodeId && edges.some(e => e.source === nodeId && e.target === nodeId)
         if (!isSelfLoopDuplicate) addEdge(sourceNode, nodeId)
         setSourceNode(null)
@@ -81,6 +83,11 @@ function GraphCanvas() {
       setNodeLabel(node.label || '')
       setNodeDialog(node)
     }
+  }
+
+  const handleNodeContextMenu = (e, nodeId) => {
+    e.preventDefault()
+    setStartNode(nodeId)
   }
 
   const handleEdgeClick = (e, edgeId) => {
@@ -103,6 +110,16 @@ function GraphCanvas() {
   const handleEdgeDialogConfirm = () => {
     updateEdge(edgeDialog.id, edgeWeight, edgeDirected)
     setEdgeDialog(null)
+  }
+
+  // retorna a cor do nó baseado no estado do step atual do algoritmo
+  const getNodeColor = (nodeId) => {
+    if (!isRunning || steps.length === 0) return 'black'
+    const state = steps[currentStep]?.nodeStates?.[nodeId]
+    if (state === 'visited') return 'red'
+    if (state === 'inQueue') return 'gray'
+    if (state === 'processing') return 'orange'
+    return 'black'
   }
 
   // ─── UTILITÁRIOS DE GEOMETRIA ─────────────────────────────────────
@@ -162,15 +179,10 @@ function GraphCanvas() {
 
     // caso 2 — arestas paralelas: curva de Bézier quadrática com curvatura proporcional ao índice
     if (hasParallel) {
-      // normaliza o par de nós para agrupar independente da direção
       const nodeA = Math.min(edge.source, edge.target)
       const nodeB = Math.max(edge.source, edge.target)
-
-      // normaliza direção — sempre calcula o ângulo do nó menor para o maior
       const fromNode = nodeA === edge.source ? source : target
       const toNode = nodeA === edge.source ? target : source
-
-      // ângulo normalizado — independente do sentido da aresta
       const dx = toNode.x - fromNode.x
       const dy = toNode.y - fromNode.y
       const angle = Math.atan2(dy, dx)
@@ -183,22 +195,16 @@ function GraphCanvas() {
 
       const edgeIndex = parallelEdges.findIndex(e => e.id === edge.id)
       const totalParallel = parallelEdges.length
-
-      // distribui curvaturas simetricamente — central reta, demais se afastam proporcionalmente
       const curveAmount = (edgeIndex - (totalParallel - 1) / 2) * 50
 
-      // ponto de controle da Bézier deslocado perpendicularmente à reta
       const mx = (source.x + target.x) / 2
       const my = (source.y + target.y) / 2
       const cpx = mx - Math.sin(angle) * curveAmount
       const cpy = my + Math.cos(angle) * curveAmount
       const d = `M ${source.x} ${source.y} Q ${cpx} ${cpy} ${target.x} ${target.y}`
 
-      // ponto médio real da curva de Bézier quadrática
       const bmx = 0.25 * source.x + 0.5 * cpx + 0.25 * target.x
       const bmy = 0.25 * source.y + 0.5 * cpy + 0.25 * target.y
-
-      // deslocamento perpendicular ao ângulo a partir do ponto médio da curva
       const labelOffset = curveAmount >= 0 ? 15 : -15
       const perpX = bmx - Math.sin(angle) * labelOffset
       const perpY = bmy + Math.cos(angle) * labelOffset
@@ -237,7 +243,7 @@ function GraphCanvas() {
   // ─── RENDER ───────────────────────────────────────────────────────
 
   return (
-    <Box ref={containerRef} sx={{ height: '100%', border: '1px solid black', borderRadius: '7px', mb: 2 }}>
+    <Box ref={containerRef} sx={{ height: '100%', border: '1px solid black', borderRadius: '7px', mb: 2, overflow: 'hidden' }}>
       <svg
         width={dimensions.width}
         height={dimensions.height}
@@ -247,7 +253,6 @@ function GraphCanvas() {
       >
 
         <defs>
-          {/* triângulo como seta apontando para o nó target */}
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="16" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="black" />
           </marker>
@@ -259,11 +264,27 @@ function GraphCanvas() {
           <g key={node.id}>
             <circle
               cx={node.x} cy={node.y} r={15}
-              fill={sourceNode === node.id ? 'orange' : draggingNode === node.id ? 'gray' : 'black'}
+              fill={
+                sourceNode === node.id ? 'orange' :
+                  draggingNode === node.id ? 'gray' :
+                    getNodeColor(node.id)
+              }
               onClick={(e) => handleNodeClick(e, node.id)}
               onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
+              onContextMenu={(e) => handleNodeContextMenu(e, node.id)}
               style={{ cursor: activeTool === 'control' ? 'grab' : 'pointer' }}
             />
+            {startNode === node.id && !isRunning && (
+              <text x={node.x} y={node.y + 5} textAnchor="middle" fontSize={14} fill="white" fontWeight="bold" pointerEvents="none">
+                I
+              </text>
+            )}
+            {/* distância do nó durante execução do BFS */}
+            {isRunning && steps[currentStep]?.distance?.[node.id] !== Infinity && steps[currentStep]?.distance?.[node.id] !== undefined && (
+              <text x={node.x} y={node.y + 5} textAnchor="middle" fontSize={12} fill="white" fontWeight="bold" pointerEvents="none">
+                {steps[currentStep].distance[node.id]}
+              </text>
+            )}
             <text x={node.x} y={node.y - 26} textAnchor="middle" fontSize={20} fill="black" pointerEvents="none">
               {node.label}
             </text>

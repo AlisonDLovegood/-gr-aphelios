@@ -21,13 +21,16 @@ const useGraphStore = create((set, get) => ({
   currentStep: 0,
   steps: [],
   pseudocode: '',
+  startNode: null,
 
   // ─── AÇÕES DO GRAFO ───────────────────────────────────────────────
 
   // adiciona um nó com id único, posição e label vazio
   addNode: (x, y) => set((state) => ({
     nodes: [...state.nodes, { id: state.nodeCounter, x, y, label: '' }],
-    nodeCounter: state.nodeCounter + 1
+    nodeCounter: state.nodeCounter + 1,
+    // define como inicial se for o primeiro nó
+    startNode: state.startNode === null ? state.nodeCounter : state.startNode
   })),
 
   // adiciona uma aresta com id único, peso nulo e não direcionada
@@ -37,10 +40,18 @@ const useGraphStore = create((set, get) => ({
   })),
 
   // remove um nó pelo id e todas as arestas conectadas a ele
-  removeNode: (id) => set((state) => ({
-    nodes: state.nodes.filter((n) => n.id !== id),
-    edges: state.edges.filter((e) => e.source !== id && e.target !== id)
-  })),
+  removeNode: (id) => set((state) => {
+    const newNodes = state.nodes.filter((n) => n.id !== id)
+    const newEdges = state.edges.filter((e) => e.source !== id && e.target !== id)
+
+    // se o nó removido era o inicial, define o próximo disponível
+    let newStartNode = state.startNode
+    if (state.startNode === id) {
+      newStartNode = newNodes.length > 0 ? newNodes[0].id : null
+    }
+
+    return { nodes: newNodes, edges: newEdges, startNode: newStartNode }
+  }),
 
   // remove uma aresta pelo id
   removeEdge: (id) => set((state) => ({
@@ -65,6 +76,8 @@ const useGraphStore = create((set, get) => ({
     nodes: state.nodes.map((n) => n.id === id ? { ...n, x, y } : n)
   })),
 
+  setStartNode: (id) => set({ startNode: id }),
+
   // ─── AÇÕES DA TOOLBAR ─────────────────────────────────────────────
 
   // troca a ferramenta ativa
@@ -84,8 +97,8 @@ const useGraphStore = create((set, get) => ({
   setAlgorithm: (algorithm) => set({ selectedAlgorithm: algorithm, currentStep: 0, pseudocode: '' }),
 
   // inicia a execução do algoritmo
-  startExecution: () => set({ isRunning: true }),
-
+  startExecution: (steps) => set({ isRunning: true, steps, currentStep: 0 }),
+  
   // para a execução do algoritmo e reseta o estado
   stopExecution: () => set({ isRunning: false, currentStep: 0, pseudocode: '', steps: [] }),
 

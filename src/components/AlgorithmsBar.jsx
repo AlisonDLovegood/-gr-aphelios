@@ -1,36 +1,80 @@
-import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import LastPageIcon from '@mui/icons-material/LastPage';
-import CloseIcon from '@mui/icons-material/Close';
-import TextField from '@mui/material/TextField';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import Button from '@mui/material/Button';
-import StopIcon from '@mui/icons-material/Stop';
+import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Divider from '@mui/material/Divider'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemText from '@mui/material/ListItemText'
+import FirstPageIcon from '@mui/icons-material/FirstPage'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import LastPageIcon from '@mui/icons-material/LastPage'
+import TextField from '@mui/material/TextField'
+import ButtonGroup from '@mui/material/ButtonGroup'
+import Button from '@mui/material/Button'
+import StopIcon from '@mui/icons-material/Stop'
+import useGraphStore from '../store/GraphStore'
+import useAlgorithmValidation from '../hooks/useAlgorithmValidation'
+import { run as bfsRun } from '../features/algorithms/bfs'
+
+
+const algorithmList = [
+  { id: 'bfs', label: 'Busca em Largura (BFS)' },
+]
 
 function AlgorithmsBar() {
+  const selectedAlgorithm = useGraphStore((state) => state.selectedAlgorithm)
+  const isRunning = useGraphStore((state) => state.isRunning)
+  const currentStep = useGraphStore((state) => state.currentStep)
+  const steps = useGraphStore((state) => state.steps)
+
+  const setAlgorithm = useGraphStore((state) => state.setAlgorithm)
+  const startExecution = useGraphStore((state) => state.startExecution)
+  const stopExecution = useGraphStore((state) => state.stopExecution)
+  const nextStep = useGraphStore((state) => state.nextStep)
+  const prevStep = useGraphStore((state) => state.prevStep)
+  const firstStep = useGraphStore((state) => state.firstStep)
+  const lastStep = useGraphStore((state) => state.lastStep)
+
+  const validation = useAlgorithmValidation()
+
+  const currentPseudocode = steps.length > 0 && isRunning
+    ? steps[currentStep]?.pseudocode ?? ''
+    : ''
+
+  const nodes = useGraphStore((state) => state.nodes)
+  const edges = useGraphStore((state) => state.edges)
+  const startNode = useGraphStore((state) => state.startNode)
+
+  const handlePlay = () => {
+    if (selectedAlgorithm === 'bfs') {
+      const generatedSteps = bfsRun(nodes, edges, startNode)
+      startExecution(generatedSteps)
+    }
+  }
+
   return (
-    <Paper elevation={3} sx={{ width: '35vh', height: '100%', display: 'flex', flexDirection: 'column', ml: 2 }}>
+    <Paper elevation={3} sx={{ width: '25vw', minWidth: '25vw', height: '100%', display: 'flex', flexDirection: 'column', ml: 1 }}>
 
       {/* SEÇÃO ALGORITMOS */}
       <Box sx={{ overflow: 'auto', p: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 900 }}>
+        <Typography variant="h6" sx={{ fontWeight: 900 }}>
           Algoritmos
         </Typography>
 
         <List dense>
-          {/* lista dinâmica virá do Zustand futuramente */}
+          {algorithmList
+            .filter(alg => validation[alg.id])
+            .map(alg => (
+              <ListItemButton
+                key={alg.id}
+                selected={selectedAlgorithm === alg.id}
+                onClick={() => setAlgorithm(alg.id)}
+              >
+                <ListItemText primary={alg.label} />
+              </ListItemButton>
+            ))}
         </List>
       </Box>
 
@@ -38,30 +82,27 @@ function AlgorithmsBar() {
 
       {/* SEÇÃO EXECUÇÃO */}
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 900 }}>
+        <Typography variant="h6" sx={{ fontWeight: 900 }}>
           Execução
         </Typography>
 
-        {/* PSEUDOCÓDIGO */}
         <TextField
           multiline
           rows={10}
-          placeholder="PSEUDO"
+          value={currentPseudocode}
+          placeholder="Selecione um algoritmo e clique em executar"
           slotProps={{ input: { readOnly: true } }}
           sx={{ '& .MuiInputBase-input': { fontSize: '12px' } }}
         />
 
-        {/* CONTROLES */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ButtonGroup size="small" fullWidth>
-            <Button><FirstPageIcon /></Button>
-            <Button><ChevronLeftIcon /></Button>
-            <Button><PlayArrowIcon /></Button>
-            <Button><ChevronRightIcon /></Button>
-            <Button><LastPageIcon /></Button>
-            <Button color="error"><StopIcon /></Button>
+            <Button onClick={firstStep} disabled={!isRunning}><FirstPageIcon /></Button>
+            <Button onClick={prevStep} disabled={!isRunning}><ChevronLeftIcon /></Button>
+            <Button onClick={handlePlay} disabled={!selectedAlgorithm || isRunning}><PlayArrowIcon /></Button>
+            <Button onClick={nextStep} disabled={!isRunning}><ChevronRightIcon /></Button>
+            <Button onClick={lastStep} disabled={!isRunning}><LastPageIcon /></Button>
+            <Button color="error" onClick={stopExecution} disabled={!isRunning}><StopIcon /></Button>
           </ButtonGroup>
         </Box>
 
@@ -71,4 +112,4 @@ function AlgorithmsBar() {
   )
 }
 
-export default AlgorithmsBar;
+export default AlgorithmsBar

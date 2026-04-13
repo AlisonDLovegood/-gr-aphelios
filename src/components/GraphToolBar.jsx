@@ -25,7 +25,7 @@ function GraphToolbar() {
   }
 
   return (
-    <Paper elevation={3} sx={{ width: '7vh', height: '100%', mr: 2, }}>
+    <Paper elevation={3} sx={{ width: '3vw', height: '100%', mr: 1, }}>
       <ToggleButtonGroup
         orientation="vertical"
         value={activeTool}

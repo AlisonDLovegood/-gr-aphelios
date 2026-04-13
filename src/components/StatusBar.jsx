@@ -35,13 +35,14 @@ function StatusBar() {
     <Paper
       elevation={3}
       sx={{
-        height: '32px',
+        minHeight: '32px',
         display: 'flex',
         alignItems: 'center',
         px: 2,
+        py: 0.5,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
         {statusItems.map((item, index) => (
           <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ display: 'flex', gap: 1 }}>
