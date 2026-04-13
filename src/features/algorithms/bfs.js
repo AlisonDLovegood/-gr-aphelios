@@ -19,7 +19,7 @@ export function canRun(nodes, edges, startNode) {
 export const pseudocode = {
 
   init:
-`BFS(Grafo, nó_inicial)
+    `BFS(Grafo, nó_inicial)
   para cada nó de Grafo exceto nó_inicial
     nó.estado = não_visitado
     nó.distancia = infinito
@@ -30,19 +30,19 @@ export const pseudocode = {
   enfileirar(fila, nó_inicial)`,
 
   dequeue:
-`atual = desenfileirar(fila)`,
+    `atual = desenfileirar(fila)`,
 
   neighbor:
-`para cada vizinho de atual
+    `para cada vizinho de atual
   se vizinho.estado == não_visitado
     vizinho.estado = em_fila
     vizinho.distancia = atual.distancia + 1`,
 
   finishNode:
-`atual.estado = visitado`,
+    `atual.estado = visitado`,
 
   done:
-`fila está vazia
+    `fila está vazia
 BFS concluído`,
 
 }
@@ -102,18 +102,6 @@ export function run(nodes, edges, startNodeId) {
         predecessor[neighborId] = current
         queue.push(neighborId)
 
-        steps.push({
-          nodeStates: { ...nodeStates },
-          distance: { ...distance },
-          pseudocode: pseudocode.neighbor,
-          queue: [...queue],
-          current,
-          checking: neighborId,
-        })
-
-      } else {
-
-        // step — vizinho já visitado ou em fila: apenas verifica
         steps.push({
           nodeStates: { ...nodeStates },
           distance: { ...distance },
