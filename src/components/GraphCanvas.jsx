@@ -116,9 +116,12 @@ function GraphCanvas() {
   const getNodeColor = (nodeId) => {
     if (!isRunning || steps.length === 0) return 'black'
     const state = steps[currentStep]?.nodeStates?.[nodeId]
+    if (!state || state === 'unvisited') return 'black'
     if (state === 'visited') return 'red'
     if (state === 'inQueue') return 'gray'
     if (state === 'processing') return 'orange'
+    // coloração — estado é a própria cor hex
+    if (state.startsWith('#')) return state
     return 'black'
   }
 
@@ -263,19 +266,23 @@ function GraphCanvas() {
         {nodes.map((node) => (
           <g key={node.id}>
             <circle
-  cx={node.x} cy={node.y} r={15}
-  fill={
-    sourceNode === node.id ? 'orange' :
-    draggingNode === node.id ? 'gray' :
-    getNodeColor(node.id)
-  }
-  stroke={steps[currentStep]?.checking === node.id ? 'orange' : 'none'}
-  strokeWidth={3}
-  onClick={(e) => handleNodeClick(e, node.id)}
-  onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
-  onContextMenu={(e) => handleNodeContextMenu(e, node.id)}
-  style={{ cursor: activeTool === 'control' ? 'grab' : 'pointer' }}
-/>
+              cx={node.x} cy={node.y} r={15}
+              fill={
+                sourceNode === node.id ? 'orange' :
+                  draggingNode === node.id ? 'gray' :
+                    getNodeColor(node.id)
+              }
+              stroke={
+                steps[currentStep]?.checking === node.id ||
+                  steps[currentStep]?.current === node.id
+                  ? 'orange' : 'none'
+              }
+              strokeWidth={3}
+              onClick={(e) => handleNodeClick(e, node.id)}
+              onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
+              onContextMenu={(e) => handleNodeContextMenu(e, node.id)}
+              style={{ cursor: activeTool === 'control' ? 'grab' : 'pointer' }}
+            />
             {startNode === node.id && !isRunning && (
               <text x={node.x} y={node.y + 5} textAnchor="middle" fontSize={14} fill="white" fontWeight="bold" pointerEvents="none">
                 I
