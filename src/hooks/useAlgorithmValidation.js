@@ -4,6 +4,7 @@ import { canRun as dfsCanRun, run as dfsRun } from '../features/algorithms/dfs'
 import { canRun as colorCanRun, run as colorRun } from '../features/algorithms/graphColoring'
 import { canRun as hamilCanRun, run as hamilRun } from '../features/algorithms/hamiltonianCycle'
 import { canRun as eulerCanRun, run as eulerRun } from '../features/algorithms/eulerianCycle'
+import { canRun as primCanRun, run as primRun } from '../features/algorithms/prim'
 
 function useAlgorithmValidation() {
   const nodes = useGraphStore((state) => state.nodes)
@@ -16,6 +17,7 @@ function useAlgorithmValidation() {
     { id: 'color', label: 'Coloração', canRun: colorCanRun(nodes, edges), run: () => colorRun(nodes, edges) },
     { id: 'hamiltonian', label: 'Caminho Hamiltoniano', canRun: hamilCanRun(nodes, edges, startNode), run: () => hamilRun(nodes, edges, startNode) },
     { id: 'eulerian', label: 'Caminho Euleriano', canRun: eulerCanRun(nodes, edges, startNode), run: () => eulerRun(nodes, edges, startNode) },
+    { id: 'prim', label: 'Prim (árvore geradora)', canRun: primCanRun(nodes, edges, startNode), run: () => primRun(nodes, edges, startNode) },
   ]
 }
 

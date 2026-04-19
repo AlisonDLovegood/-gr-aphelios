@@ -122,6 +122,7 @@ function GraphCanvas() {
     if (state === 'processing') return 'orange'
     if (state === 'inPath') return 'orange'
     if (state === 'confirmed') return 'green'
+    if (state === 'inTree') return 'green'
     if (state.startsWith('#')) return state
     return 'black'
   }
