@@ -13,7 +13,6 @@ export function canRun(nodes, edges, startNode) {
   if (edges.length === 0) return false
   if (startNode === null) return false
 
-  // todo nó deve ter grau par
   const degree = {}
   nodes.forEach(n => { degree[n.id] = 0 })
   edges.forEach(e => {
@@ -22,7 +21,6 @@ export function canRun(nodes, edges, startNode) {
   })
   if (!nodes.every(n => degree[n.id] % 2 === 0)) return false
 
-  // verifica conectividade via BFS inline
   const visited = new Set([startNode])
   const queue = [startNode]
   while (queue.length > 0) {
@@ -66,6 +64,7 @@ export function run(nodes, edges, startNodeId) {
   nodes.forEach(n => { nodeStates[n.id] = NODE_STATES.UNVISITED })
 
   const usedEdges = new Set()
+  const visitedEdges = []
   const circuit = [startNodeId]
   let current = startNodeId
   nodeStates[current] = NODE_STATES.PROCESSING
@@ -75,6 +74,9 @@ export function run(nodes, edges, startNodeId) {
     pseudocode: pseudocode.init,
     current,
     circuit: [...circuit],
+    currentEdge: null,
+    visitedEdges: [],
+    confirmedEdges: [],
   })
 
   while (true) {
@@ -88,6 +90,7 @@ export function run(nodes, edges, startNodeId) {
     if (!unusedEdge) break
 
     usedEdges.add(unusedEdge.id)
+    visitedEdges.push(unusedEdge.id)
     const next = unusedEdge.source === current ? unusedEdge.target : unusedEdge.source
     nodeStates[current] = NODE_STATES.VISITED
     nodeStates[next] = NODE_STATES.PROCESSING
@@ -100,17 +103,25 @@ export function run(nodes, edges, startNodeId) {
       current,
       circuit: [...circuit],
       checking: current,
+      currentEdge: unusedEdge.id,
+      visitedEdges: [...visitedEdges],
+      confirmedEdges: [],
     })
   }
-circuit.forEach(nodeId => {
-  nodeStates[nodeId] = NODE_STATES.CONFIRMED
-})
-  // step final — retornou ao nó inicial
+
+  // confirma todos os nós e arestas do circuito
+  circuit.forEach(nodeId => {
+    nodeStates[nodeId] = NODE_STATES.CONFIRMED
+  })
+
   steps.push({
     nodeStates: { ...nodeStates },
     pseudocode: pseudocode.done,
     current: null,
     circuit: [...circuit],
+    currentEdge: null,
+    visitedEdges: [],
+    confirmedEdges: [...visitedEdges],
   })
 
   return steps

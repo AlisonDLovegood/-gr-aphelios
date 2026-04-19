@@ -120,10 +120,19 @@ function GraphCanvas() {
     if (state === 'visited') return 'red'
     if (state === 'inQueue') return 'gray'
     if (state === 'processing') return 'orange'
-    // coloração — estado é a própria cor hex
-    if (state.startsWith('#')) return state
     if (state === 'inPath') return 'orange'
     if (state === 'confirmed') return 'green'
+    if (state.startsWith('#')) return state
+    return 'black'
+  }
+
+  // retorna a cor da aresta baseado no estado do step atual do algoritmo
+  const getEdgeColor = (edgeId) => {
+    if (!isRunning || steps.length === 0) return 'black'
+    const step = steps[currentStep]
+    if (step?.currentEdge === edgeId) return 'orange'
+    if (step?.visitedEdges?.includes(edgeId)) return 'red'
+    if (step?.confirmedEdges?.includes(edgeId)) return 'green'
     return 'black'
   }
 
@@ -163,15 +172,16 @@ function GraphCanvas() {
       )
     )
     const { markerStart, markerEnd } = getMarker(edge)
+    const edgeColor = getEdgeColor(edge.id)
 
-    // caso 1 — self-loop: ellipse posicionada acima e à esquerda do nó
+    // caso 1 — self-loop
     if (isSelfLoop) {
       const loopRadius = 25
       const lx = source.x - 10
       const ly = source.y - 18
       return (
         <g key={edge.id}>
-          <ellipse cx={lx} cy={ly} rx={loopRadius} ry={loopRadius / 1.3} fill="none" stroke="black" strokeWidth={2} pointerEvents="none" />
+          <ellipse cx={lx} cy={ly} rx={loopRadius} ry={loopRadius / 1.3} fill="none" stroke={edgeColor} strokeWidth={2} pointerEvents="none" />
           <ellipse cx={lx} cy={ly} rx={loopRadius} ry={loopRadius / 1.5} fill="none" stroke="transparent" strokeWidth={12} onClick={(e) => handleEdgeClick(e, edge.id)} style={{ cursor: 'pointer' }} />
           {edge.weight !== null && (
             <text x={lx} y={ly - loopRadius - 4} textAnchor="middle" fontSize={14} fill="black" pointerEvents="none">
@@ -182,7 +192,7 @@ function GraphCanvas() {
       )
     }
 
-    // caso 2 — arestas paralelas: curva de Bézier quadrática com curvatura proporcional ao índice
+    // caso 2 — arestas paralelas: curva de Bézier quadrática
     if (hasParallel) {
       const nodeA = Math.min(edge.source, edge.target)
       const nodeB = Math.max(edge.source, edge.target)
@@ -216,7 +226,7 @@ function GraphCanvas() {
 
       return (
         <g key={edge.id}>
-          <path d={d} fill="none" stroke="black" strokeWidth={2} pointerEvents="none" markerStart={markerStart} markerEnd={markerEnd} />
+          <path d={d} fill="none" stroke={edgeColor} strokeWidth={2} pointerEvents="none" markerStart={markerStart} markerEnd={markerEnd} />
           {edge.weight !== null && (
             <text x={perpX} y={perpY} textAnchor="middle" fontSize={14} fill="black" pointerEvents="none">
               {edge.weight}
@@ -227,10 +237,10 @@ function GraphCanvas() {
       )
     }
 
-    // caso 3 — linha reta simples com peso deslocado perpendicularmente — tangente
+    // caso 3 — linha reta simples
     return (
       <g key={edge.id}>
-        <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke="black" strokeWidth={2} pointerEvents="none" markerStart={markerStart} markerEnd={markerEnd} />
+        <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke={edgeColor} strokeWidth={2} pointerEvents="none" markerStart={markerStart} markerEnd={markerEnd} />
         {renderWeight(source.x, source.y, target.x, target.y, edge.weight)}
         <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke="transparent" strokeWidth={12} onClick={(e) => handleEdgeClick(e, edge.id)} style={{ cursor: 'pointer' }} />
       </g>
@@ -271,12 +281,12 @@ function GraphCanvas() {
               cx={node.x} cy={node.y} r={15}
               fill={
                 sourceNode === node.id ? 'orange' :
-                  draggingNode === node.id ? 'gray' :
-                    getNodeColor(node.id)
+                draggingNode === node.id ? 'gray' :
+                getNodeColor(node.id)
               }
               stroke={
                 steps[currentStep]?.checking === node.id ||
-                  steps[currentStep]?.current === node.id
+                steps[currentStep]?.current === node.id
                   ? 'orange' : 'none'
               }
               strokeWidth={3}
@@ -290,7 +300,6 @@ function GraphCanvas() {
                 I
               </text>
             )}
-            {/* distância do nó durante execução do BFS */}
             {isRunning && steps[currentStep]?.distance?.[node.id] !== Infinity && steps[currentStep]?.distance?.[node.id] !== undefined && (
               <text x={node.x} y={node.y + 5} textAnchor="middle" fontSize={12} fill="white" fontWeight="bold" pointerEvents="none">
                 {steps[currentStep].distance[node.id]}

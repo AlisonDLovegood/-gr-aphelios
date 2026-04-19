@@ -50,31 +50,31 @@ export function canRun(nodes, edges, startNode) {
 export const pseudocode = {
 
   init:
-`Hamiltoniano(Grafo, nó_inicial)
+    `Hamiltoniano(Grafo, nó_inicial)
   caminho = [nó_inicial]
   nó_inicial.estado = no_caminho`,
 
   tryNeighbor:
-`para cada vizinho não visitado do nó atual
+    `para cada vizinho não visitado do nó atual
   adicionar vizinho ao caminho
   vizinho.estado = no_caminho`,
 
   checkCycle:
-`se todos os nós estão no caminho
+    `se todos os nós estão no caminho
   verificar se existe aresta de volta ao nó_inicial
   se sim — ciclo hamiltoniano encontrado`,
 
   backtrack:
-`sem vizinhos válidos
+    `sem vizinhos válidos
   remover nó atual do caminho
   nó.estado = não_visitado`,
 
   found:
-`ciclo hamiltoniano encontrado
+    `ciclo hamiltoniano encontrado
   todos os nós confirmados no ciclo`,
 
   notFound:
-`nenhum ciclo hamiltoniano existe
+    `nenhum ciclo hamiltoniano existe
   Hamiltoniano concluído`,
 
 }
@@ -83,6 +83,8 @@ export const pseudocode = {
 export function run(nodes, edges, startNodeId) {
   const steps = []
   const nodeStates = {}
+  const visitedEdges = []
+  const confirmedEdges = []
 
   nodes.forEach(n => {
     nodeStates[n.id] = NODE_STATES.UNVISITED
@@ -92,12 +94,14 @@ export function run(nodes, edges, startNodeId) {
   const path = [startNodeId]
   const visited = new Set([startNodeId])
 
-  // step 1 — inicialização
   steps.push({
     nodeStates: { ...nodeStates },
     pseudocode: pseudocode.init,
     current: startNodeId,
     path: [...path],
+    currentEdge: null,
+    visitedEdges: [...visitedEdges],
+    confirmedEdges: [...confirmedEdges],
   })
 
   let found = false
@@ -105,27 +109,45 @@ export function run(nodes, edges, startNodeId) {
   function backtrack() {
     if (path.length === nodes.length) {
       const last = path[path.length - 1]
-      const hasCycle = edges.some(e =>
+      const cycleEdge = edges.find(e =>
         (!e.directed && ((e.source === last && e.target === startNodeId) || (e.source === startNodeId && e.target === last))) ||
         (e.directed && e.source === last && e.target === startNodeId)
       )
 
-      // step — verifica se fecha o ciclo
       steps.push({
         nodeStates: { ...nodeStates },
         pseudocode: pseudocode.checkCycle,
         current: last,
         path: [...path],
+        currentEdge: cycleEdge?.id ?? null,
+        visitedEdges: [...visitedEdges],
+        confirmedEdges: [...confirmedEdges],
       })
 
-      if (hasCycle) {
-        // confirma todos os nós do ciclo
+      if (cycleEdge) {
         nodes.forEach(n => { nodeStates[n.id] = NODE_STATES.CONFIRMED })
+
+        // reconstrói as arestas do caminho final usando o path
+        const pathEdges = []
+        for (let i = 0; i < path.length - 1; i++) {
+          const from = path[i]
+          const to = path[i + 1]
+          const e = edges.find(ed =>
+            (!ed.directed && ((ed.source === from && ed.target === to) || (ed.source === to && ed.target === from))) ||
+            (ed.directed && ed.source === from && ed.target === to)
+          )
+          if (e) pathEdges.push(e.id)
+        }
+        pathEdges.push(cycleEdge.id)
+
         steps.push({
           nodeStates: { ...nodeStates },
           pseudocode: pseudocode.found,
           current: null,
           path: [...path],
+          currentEdge: null,
+          visitedEdges: [],
+          confirmedEdges: pathEdges,
         })
         found = true
         return true
@@ -135,40 +157,46 @@ export function run(nodes, edges, startNodeId) {
     }
 
     const current = path[path.length - 1]
-    const neighbors = edges
-      .filter(e => {
-        if (!e.directed) return e.source === current || e.target === current
-        return e.source === current
-      })
-      .map(e => e.source === current ? e.target : e.source)
-      .filter(id => !visited.has(id))
+    const neighborEdges = edges.filter(e => {
+      if (!e.directed) return e.source === current || e.target === current
+      return e.source === current
+    })
 
-    for (const neighborId of neighbors) {
+    for (const edge of neighborEdges) {
+      const neighborId = edge.source === current ? edge.target : edge.source
+      if (visited.has(neighborId)) continue
+
       visited.add(neighborId)
       path.push(neighborId)
       nodeStates[neighborId] = NODE_STATES.IN_PATH
+      visitedEdges.push(edge.id)
 
-      // step — tenta vizinho
       steps.push({
         nodeStates: { ...nodeStates },
         pseudocode: pseudocode.tryNeighbor,
         current: neighborId,
         path: [...path],
         checking: neighborId,
+        currentEdge: edge.id,
+        visitedEdges: [...visitedEdges],
+        confirmedEdges: [...confirmedEdges],
       })
 
       if (backtrack()) return true
 
-      // step — backtrack
       path.pop()
       visited.delete(neighborId)
       nodeStates[neighborId] = NODE_STATES.UNVISITED
+      visitedEdges.pop()
 
       steps.push({
         nodeStates: { ...nodeStates },
         pseudocode: pseudocode.backtrack,
         current: path[path.length - 1],
         path: [...path],
+        currentEdge: null,
+        visitedEdges: [...visitedEdges],
+        confirmedEdges: [...confirmedEdges],
       })
     }
 
@@ -183,6 +211,9 @@ export function run(nodes, edges, startNodeId) {
       pseudocode: pseudocode.notFound,
       current: null,
       path: [...path],
+      currentEdge: null,
+      visitedEdges: [...visitedEdges],
+      confirmedEdges: [...confirmedEdges],
     })
   }
 

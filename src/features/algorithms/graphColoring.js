@@ -53,22 +53,22 @@ export function run(nodes, edges) {
     nodeStates[n.id] = 'unvisited'
   })
 
-  // step 1 — inicialização
   steps.push({
     nodeStates: { ...nodeStates },
     pseudocode: pseudocode.init,
     current: null,
+    currentEdge: null,
+    visitedEdges: [],
   })
 
   for (const node of nodes) {
 
-    // pega as cores já usadas pelos vizinhos
-    const neighbors = edges
-      .filter(e => {
-        if (!e.directed) return e.source === node.id || e.target === node.id
-        return e.source === node.id
-      })
-      .map(e => e.source === node.id ? e.target : e.source)
+    const neighborEdges = edges.filter(e => {
+      if (!e.directed) return e.source === node.id || e.target === node.id
+      return e.source === node.id
+    })
+
+    const neighbors = neighborEdges.map(e => e.source === node.id ? e.target : e.source)
 
     const usedColors = new Set(
       neighbors
@@ -81,9 +81,10 @@ export function run(nodes, edges) {
       nodeStates: { ...nodeStates },
       pseudocode: pseudocode.evaluateNode,
       current: node.id,
+      currentEdge: null,
+      visitedEdges: neighborEdges.map(e => e.id),
     })
 
-    // atribui a menor cor disponível não usada pelos vizinhos
     let colorIndex = 0
     while (usedColors.has(COLORS[colorIndex])) colorIndex++
     nodeStates[node.id] = COLORS[colorIndex]
@@ -93,14 +94,17 @@ export function run(nodes, edges) {
       nodeStates: { ...nodeStates },
       pseudocode: pseudocode.colorNode,
       current: node.id,
+      currentEdge: null,
+      visitedEdges: neighborEdges.map(e => e.id),
     })
   }
 
-  // step final
   steps.push({
     nodeStates: { ...nodeStates },
     pseudocode: pseudocode.done,
     current: null,
+    currentEdge: null,
+    visitedEdges: [],
   })
 
   return steps

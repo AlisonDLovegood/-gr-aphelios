@@ -23,7 +23,7 @@ export function canRun(nodes, edges, startNode) {
 export const pseudocode = {
 
   init:
-    `BFS(Grafo, nó_inicial)
+`BFS(Grafo, nó_inicial)
   para cada nó de Grafo exceto nó_inicial
     nó.estado = não_visitado
     nó.distancia = infinito
@@ -34,19 +34,19 @@ export const pseudocode = {
   enfileirar(fila, nó_inicial)`,
 
   dequeue:
-    `atual = desenfileirar(fila)`,
+`atual = desenfileirar(fila)`,
 
   neighbor:
-    `para cada vizinho de atual
+`para cada vizinho de atual
   se vizinho.estado == não_visitado
     vizinho.estado = em_fila
     vizinho.distancia = atual.distancia + 1`,
 
   finishNode:
-    `atual.estado = visitado`,
+`atual.estado = visitado`,
 
   done:
-    `fila está vazia
+`fila está vazia
 BFS concluído`,
 
 }
@@ -58,6 +58,7 @@ export function run(nodes, edges, startNodeId) {
   const nodeStates = {}
   const distance = {}
   const predecessor = {}
+  const visitedEdges = []
 
   nodes.forEach(n => {
     nodeStates[n.id] = NODE_STATES.UNVISITED
@@ -65,7 +66,6 @@ export function run(nodes, edges, startNodeId) {
     predecessor[n.id] = null
   })
 
-  // step 1 — inicialização: todos não visitados, nó inicial em fila
   nodeStates[startNodeId] = NODE_STATES.IN_QUEUE
   distance[startNodeId] = 0
   const queue = [startNodeId]
@@ -76,11 +76,12 @@ export function run(nodes, edges, startNodeId) {
     pseudocode: pseudocode.init,
     queue: [...queue],
     current: null,
+    currentEdge: null,
+    visitedEdges: [...visitedEdges],
   })
 
   while (queue.length > 0) {
 
-    // step — nó atual sendo processado
     const current = queue.shift()
     nodeStates[current] = NODE_STATES.PROCESSING
 
@@ -90,24 +91,25 @@ export function run(nodes, edges, startNodeId) {
       pseudocode: pseudocode.dequeue,
       queue: [...queue],
       current,
+      currentEdge: null,
+      visitedEdges: [...visitedEdges],
     })
 
-    const neighbors = edges
-      .filter(e => {
-        if (!e.directed) return e.source === current || e.target === current
-        return e.source === current
-      })
-      .map(e => e.source === current ? e.target : e.source)
+    const neighborEdges = edges.filter(e => {
+      if (!e.directed) return e.source === current || e.target === current
+      return e.source === current
+    })
 
-    for (const neighborId of neighbors) {
+    for (const edge of neighborEdges) {
+      const neighborId = edge.source === current ? edge.target : edge.source
 
       if (nodeStates[neighborId] === NODE_STATES.UNVISITED) {
 
-        // step — vizinho não visitado: enfileira e atualiza distância
         nodeStates[neighborId] = NODE_STATES.IN_QUEUE
         distance[neighborId] = distance[current] + 1
         predecessor[neighborId] = current
         queue.push(neighborId)
+        visitedEdges.push(edge.id)
 
         steps.push({
           nodeStates: { ...nodeStates },
@@ -116,12 +118,12 @@ export function run(nodes, edges, startNodeId) {
           queue: [...queue],
           current,
           checking: neighborId,
+          currentEdge: edge.id,
+          visitedEdges: [...visitedEdges],
         })
-
       }
     }
 
-    // step — nó atual finalizado
     nodeStates[current] = NODE_STATES.VISITED
     steps.push({
       nodeStates: { ...nodeStates },
@@ -129,16 +131,19 @@ export function run(nodes, edges, startNodeId) {
       pseudocode: pseudocode.finishNode,
       queue: [...queue],
       current,
+      currentEdge: null,
+      visitedEdges: [...visitedEdges],
     })
   }
 
-  // step final — BFS concluído
   steps.push({
     nodeStates: { ...nodeStates },
     distance: { ...distance },
     pseudocode: pseudocode.done,
     queue: [],
     current: null,
+    currentEdge: null,
+    visitedEdges: [...visitedEdges],
   })
 
   return steps
