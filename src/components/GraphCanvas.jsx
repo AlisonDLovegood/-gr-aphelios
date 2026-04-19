@@ -122,6 +122,8 @@ function GraphCanvas() {
     if (state === 'processing') return 'orange'
     // coloração — estado é a própria cor hex
     if (state.startsWith('#')) return state
+    if (state === 'inPath') return 'orange'
+    if (state === 'confirmed') return 'green'
     return 'black'
   }
 
