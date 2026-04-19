@@ -12,6 +12,10 @@ export function canRun(nodes, edges, startNode) {
   if (nodes.length === 0) return false
   if (startNode === null) return false
   if (edges.length === 0) return false
+
+  const hasEdgeFromStart = edges.some(e => e.source === startNode || e.target === startNode)
+  if (!hasEdgeFromStart) return false
+
   return true
 }
 
@@ -89,7 +93,10 @@ export function run(nodes, edges, startNodeId) {
     })
 
     const neighbors = edges
-      .filter(e => e.source === current || e.target === current)
+      .filter(e => {
+        if (!e.directed) return e.source === current || e.target === current
+        return e.source === current
+      })
       .map(e => e.source === current ? e.target : e.source)
 
     for (const neighborId of neighbors) {

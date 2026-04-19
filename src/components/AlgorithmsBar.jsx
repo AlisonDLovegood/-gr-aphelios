@@ -16,12 +16,7 @@ import Button from '@mui/material/Button'
 import StopIcon from '@mui/icons-material/Stop'
 import useGraphStore from '../store/GraphStore'
 import useAlgorithmValidation from '../hooks/useAlgorithmValidation'
-import { run as bfsRun } from '../features/algorithms/bfs'
 
-
-const algorithmList = [
-  { id: 'bfs', label: 'Busca em Largura (BFS)' },
-]
 
 function AlgorithmsBar() {
   const selectedAlgorithm = useGraphStore((state) => state.selectedAlgorithm)
@@ -43,15 +38,10 @@ function AlgorithmsBar() {
     ? steps[currentStep]?.pseudocode ?? ''
     : ''
 
-  const nodes = useGraphStore((state) => state.nodes)
-  const edges = useGraphStore((state) => state.edges)
-  const startNode = useGraphStore((state) => state.startNode)
-
   const handlePlay = () => {
-    if (selectedAlgorithm === 'bfs') {
-      const generatedSteps = bfsRun(nodes, edges, startNode)
-      startExecution(generatedSteps)
-    }
+    const alg = validation.find(a => a.id === selectedAlgorithm)
+    if (!alg) return
+    startExecution(alg.run())
   }
 
   return (
@@ -64,8 +54,8 @@ function AlgorithmsBar() {
         </Typography>
 
         <List dense>
-          {algorithmList
-            .filter(alg => validation[alg.id])
+          {validation
+            .filter(alg => alg.canRun)
             .map(alg => (
               <ListItemButton
                 key={alg.id}

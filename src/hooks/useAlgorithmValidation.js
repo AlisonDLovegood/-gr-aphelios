@@ -1,14 +1,16 @@
 import useGraphStore from '../store/GraphStore'
-import { canRun as bfsCanRun } from '../features/algorithms/bfs'
+import { canRun as bfsCanRun, run as bfsRun } from '../features/algorithms/bfs'
+import { canRun as dfsCanRun, run as dfsRun } from '../features/algorithms/dfs'
 
 function useAlgorithmValidation() {
   const nodes = useGraphStore((state) => state.nodes)
   const edges = useGraphStore((state) => state.edges)
   const startNode = useGraphStore((state) => state.startNode)
 
-  return {
-    bfs: bfsCanRun(nodes, edges, startNode),
-  }
+  return [
+    { id: 'bfs', label: 'Busca em Largura (BFS)', canRun: bfsCanRun(nodes, edges, startNode), run: () => bfsRun(nodes, edges, startNode) },
+    { id: 'dfs', label: 'Busca em Profundidade (DFS)', canRun: dfsCanRun(nodes, edges, startNode), run: () => dfsRun(nodes, edges, startNode) },
+  ]
 }
 
 export default useAlgorithmValidation
