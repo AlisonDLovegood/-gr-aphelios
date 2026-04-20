@@ -1,9 +1,10 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',
-  PROCESSING: 'processing',
-  VISITED: 'visited',
-  CONFIRMED: 'confirmed',
+  UNVISITED: 'unvisited',    // preto
+  PROCESSING: 'processing',  // laranja — sendo percorrido
+  VISITED: 'visited',        // azul — já percorrido
+  CONFIRMED: 'confirmed',    // verde — confirmado no circuito
+  REJECTED: 'rejected',      // vermelho — descartado no backtrack
 }
 
 // ─── VALIDAÇÃO ────────────────────────────────────────────────────
@@ -41,18 +42,24 @@ export const pseudocode = {
 
   init:
 `Euleriano(Grafo, nó_inicial)
-  circuito = []
+  circuito = [nó_inicial]
   nó_atual = nó_inicial`,
 
   traverse:
-`enquanto nó_atual tem arestas não visitadas
-  escolher aresta não visitada de nó_atual
+`escolher aresta não visitada de nó_atual
+  verificar se aresta é válida no sentido atual
   marcar aresta como visitada
   nó_atual = outro extremo da aresta
   adicionar nó_atual ao circuito`,
 
+  backtrack:
+`sem arestas válidas no nó_atual
+  retornar ao nó anterior
+  tentar outro caminho`,
+
   done:
 `nó_atual == nó_inicial
+todas as arestas visitadas
 circuito euleriano concluído`,
 
 }
@@ -64,7 +71,8 @@ export function run(nodes, edges, startNodeId) {
   nodes.forEach(n => { nodeStates[n.id] = NODE_STATES.UNVISITED })
 
   const usedEdges = new Set()
-  const visitedEdges = []
+  const visitedEdgesList = []
+  const rejectedEdgesList = []
   const circuit = [startNodeId]
   let current = startNodeId
   nodeStates[current] = NODE_STATES.PROCESSING
@@ -77,41 +85,84 @@ export function run(nodes, edges, startNodeId) {
     currentEdge: null,
     visitedEdges: [],
     confirmedEdges: [],
+    rejectedEdges: [],
   })
 
-  while (true) {
-    const unusedEdge = edges.find(e =>
+  let found = false
+
+  function dfs() {
+    if (usedEdges.size === edges.length) {
+      if (current === startNodeId) {
+        found = true
+        return true
+      }
+      return false
+    }
+
+    const availableEdges = edges.filter(e =>
       !usedEdges.has(e.id) && (
         (!e.directed && (e.source === current || e.target === current)) ||
         (e.directed && e.source === current)
       )
     )
 
-    if (!unusedEdge) break
+    for (const edge of availableEdges) {
+      const next = edge.source === current ? edge.target : edge.source
 
-    usedEdges.add(unusedEdge.id)
-    visitedEdges.push(unusedEdge.id)
-    const next = unusedEdge.source === current ? unusedEdge.target : unusedEdge.source
-    nodeStates[current] = NODE_STATES.VISITED
-    nodeStates[next] = NODE_STATES.PROCESSING
-    current = next
-    circuit.push(current)
+      usedEdges.add(edge.id)
+      visitedEdgesList.push(edge.id)
+      nodeStates[current] = NODE_STATES.VISITED
+      const prev = current
+      current = next
 
-    steps.push({
-      nodeStates: { ...nodeStates },
-      pseudocode: pseudocode.traverse,
-      current,
-      circuit: [...circuit],
-      checking: current,
-      currentEdge: unusedEdge.id,
-      visitedEdges: [...visitedEdges],
-      confirmedEdges: [],
-    })
+      // remove de rejeitadas se estava lá
+      const rejEdgeIdx = rejectedEdgesList.indexOf(edge.id)
+      if (rejEdgeIdx !== -1) rejectedEdgesList.splice(rejEdgeIdx, 1)
+      nodeStates[next] = NODE_STATES.PROCESSING
+      circuit.push(current)
+
+      steps.push({
+        nodeStates: { ...nodeStates },
+        pseudocode: pseudocode.traverse,
+        current,
+        circuit: [...circuit],
+        checking: current,
+        currentEdge: edge.id,
+        visitedEdges: [...visitedEdgesList],
+        confirmedEdges: [],
+        rejectedEdges: [...rejectedEdgesList],
+      })
+
+      if (dfs()) return true
+
+      // backtrack
+      current = prev
+      circuit.pop()
+      usedEdges.delete(edge.id)
+      visitedEdgesList.pop()
+      rejectedEdgesList.push(edge.id)
+      nodeStates[next] = NODE_STATES.REJECTED
+      nodeStates[current] = NODE_STATES.PROCESSING
+
+      steps.push({
+        nodeStates: { ...nodeStates },
+        pseudocode: pseudocode.backtrack,
+        current,
+        circuit: [...circuit],
+        currentEdge: null,
+        visitedEdges: [...visitedEdgesList],
+        confirmedEdges: [],
+        rejectedEdges: [...rejectedEdgesList],
+      })
+    }
+
+    return false
   }
 
-  // confirma todos os nós e arestas do circuito
-  circuit.forEach(nodeId => {
-    nodeStates[nodeId] = NODE_STATES.CONFIRMED
+  dfs()
+
+  nodes.forEach(n => {
+    nodeStates[n.id] = NODE_STATES.CONFIRMED
   })
 
   steps.push({
@@ -121,7 +172,8 @@ export function run(nodes, edges, startNodeId) {
     circuit: [...circuit],
     currentEdge: null,
     visitedEdges: [],
-    confirmedEdges: [...visitedEdges],
+    confirmedEdges: [...visitedEdgesList],
+    rejectedEdges: [],
   })
 
   return steps

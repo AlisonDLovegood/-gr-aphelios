@@ -117,23 +117,24 @@ function GraphCanvas() {
     if (!isRunning || steps.length === 0) return 'black'
     const state = steps[currentStep]?.nodeStates?.[nodeId]
     if (!state || state === 'unvisited') return 'black'
-    if (state === 'visited') return 'red'
-    if (state === 'inQueue') return 'gray'
     if (state === 'processing') return 'orange'
-    if (state === 'inPath') return 'orange'
+    if (state === 'visited') return '#1565c0'
     if (state === 'confirmed') return 'green'
+    if (state === 'rejected') return 'red'
+    if (state === 'inQueue') return 'gray'
+    if (state === 'inPath') return 'orange'
     if (state === 'inTree') return 'green'
-    if (state.startsWith('#')) return state
+    if (state.startsWith('#')) return state 
     return 'black'
   }
 
-  // retorna a cor da aresta baseado no estado do step atual do algoritmo
   const getEdgeColor = (edgeId) => {
     if (!isRunning || steps.length === 0) return 'black'
     const step = steps[currentStep]
     if (step?.currentEdge === edgeId) return 'orange'
-    if (step?.visitedEdges?.includes(edgeId)) return 'red'
     if (step?.confirmedEdges?.includes(edgeId)) return 'green'
+    if (step?.rejectedEdges?.includes(edgeId)) return 'red'
+    if (step?.visitedEdges?.includes(edgeId)) return '#1565c0'
     return 'black'
   }
 
@@ -282,12 +283,12 @@ function GraphCanvas() {
               cx={node.x} cy={node.y} r={15}
               fill={
                 sourceNode === node.id ? 'orange' :
-                draggingNode === node.id ? 'gray' :
-                getNodeColor(node.id)
+                  draggingNode === node.id ? 'gray' :
+                    getNodeColor(node.id)
               }
               stroke={
                 steps[currentStep]?.checking === node.id ||
-                steps[currentStep]?.current === node.id
+                  steps[currentStep]?.current === node.id
                   ? 'orange' : 'none'
               }
               strokeWidth={3}

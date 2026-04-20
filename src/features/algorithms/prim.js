@@ -1,8 +1,8 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',
-  IN_TREE: 'inTree',       // verde — já na árvore geradora
-  PROCESSING: 'processing', // laranja — sendo avaliado
+  UNVISITED: 'unvisited',    // preto
+  PROCESSING: 'processing',  // laranja — sendo avaliado
+  IN_TREE: 'inTree',         // verde — confirmado na árvore
 }
 
 // ─── VALIDAÇÃO ────────────────────────────────────────────────────
@@ -12,10 +12,8 @@ export function canRun(nodes, edges, startNode) {
   if (startNode === null) return false
   if (edges.length === 0) return false
 
-  // prim exige grafo não direcionado
   if (edges.some(e => e.directed)) return false
 
-  // verifica conectividade via BFS inline
   const visited = new Set([startNode])
   const queue = [startNode]
   while (queue.length > 0) {
@@ -73,11 +71,11 @@ export function run(nodes, edges, startNodeId) {
     currentEdge: null,
     visitedEdges: [],
     confirmedEdges: [...confirmedEdges],
+    rejectedEdges: [],
   })
 
   while (inTree.size < nodes.length) {
 
-    // encontra todas as arestas candidatas — uma ponta na árvore, outra fora
     const candidateEdges = edges.filter(e => {
       const sourceInTree = inTree.has(e.source)
       const targetInTree = inTree.has(e.target)
@@ -94,9 +92,9 @@ export function run(nodes, edges, startNodeId) {
       currentEdge: null,
       visitedEdges: candidateEdges.map(e => e.id),
       confirmedEdges: [...confirmedEdges],
+      rejectedEdges: [],
     })
 
-    // escolhe a aresta de menor peso — peso nulo assume 1
     const minEdge = candidateEdges.reduce((min, e) => {
       const w = e.weight ?? 1
       return w < (min.weight ?? 1) ? e : min
@@ -115,13 +113,13 @@ export function run(nodes, edges, startNodeId) {
       currentEdge: minEdge.id,
       visitedEdges: [],
       confirmedEdges: [...confirmedEdges],
+      rejectedEdges: [],
       checking: newNode,
     })
 
     nodeStates[newNode] = NODE_STATES.IN_TREE
   }
 
-  // confirma todos os nós na árvore
   nodes.forEach(n => {
     if (inTree.has(n.id)) nodeStates[n.id] = NODE_STATES.IN_TREE
   })
@@ -133,6 +131,7 @@ export function run(nodes, edges, startNodeId) {
     currentEdge: null,
     visitedEdges: [],
     confirmedEdges: [...confirmedEdges],
+    rejectedEdges: [],
   })
 
   return steps

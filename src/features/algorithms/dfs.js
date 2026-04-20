@@ -1,9 +1,9 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',
-  IN_QUEUE: 'inQueue',
-  PROCESSING: 'processing',
-  VISITED: 'visited',
+  UNVISITED: 'unvisited',   // preto
+  IN_QUEUE: 'inQueue',      // cinza — na pilha
+  PROCESSING: 'processing', // laranja — sendo processado
+  VISITED: 'visited',       // azul — já visitado
 }
 
 // ─── VALIDAÇÃO ────────────────────────────────────────────────────
@@ -79,6 +79,8 @@ export function run(nodes, edges, startNodeId) {
     current: null,
     currentEdge: null,
     visitedEdges: [...visitedEdges],
+    confirmedEdges: [],
+    rejectedEdges: [],
   })
 
   while (stack.length > 0) {
@@ -97,6 +99,8 @@ export function run(nodes, edges, startNodeId) {
       current,
       currentEdge: null,
       visitedEdges: [...visitedEdges],
+      confirmedEdges: [],
+      rejectedEdges: [],
     })
 
     const neighborEdges = edges.filter(e => {
@@ -124,6 +128,8 @@ export function run(nodes, edges, startNodeId) {
           checking: neighborId,
           currentEdge: edge.id,
           visitedEdges: [...visitedEdges],
+          confirmedEdges: [],
+          rejectedEdges: [],
         })
       }
     }
@@ -137,6 +143,8 @@ export function run(nodes, edges, startNodeId) {
       current,
       currentEdge: null,
       visitedEdges: [...visitedEdges],
+      confirmedEdges: [],
+      rejectedEdges: [],
     })
   }
 
@@ -148,6 +156,8 @@ export function run(nodes, edges, startNodeId) {
     current: null,
     currentEdge: null,
     visitedEdges: [...visitedEdges],
+    confirmedEdges: [],
+    rejectedEdges: [],
   })
 
   return steps

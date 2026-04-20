@@ -46,7 +46,6 @@ Coloração concluída`,
 // ─── EXECUÇÃO DA COLORAÇÃO ────────────────────────────────────────
 export function run(nodes, edges) {
   const steps = []
-
   const nodeStates = {}
 
   nodes.forEach(n => {
@@ -59,16 +58,20 @@ export function run(nodes, edges) {
     current: null,
     currentEdge: null,
     visitedEdges: [],
+    confirmedEdges: [],
+    rejectedEdges: [],
   })
 
   for (const node of nodes) {
 
-    const neighborEdges = edges.filter(e => {
-      if (!e.directed) return e.source === node.id || e.target === node.id
-      return e.source === node.id
-    })
+    // coloração considera todos os vizinhos independente da direção
+    const neighborEdges = edges.filter(e =>
+      e.source === node.id || e.target === node.id
+    )
 
-    const neighbors = neighborEdges.map(e => e.source === node.id ? e.target : e.source)
+    const neighbors = neighborEdges.map(e =>
+      e.source === node.id ? e.target : e.source
+    )
 
     const usedColors = new Set(
       neighbors
@@ -76,26 +79,28 @@ export function run(nodes, edges) {
         .filter(color => color !== 'unvisited' && color !== null)
     )
 
-    // step — avaliando vizinhos do nó atual
     steps.push({
       nodeStates: { ...nodeStates },
       pseudocode: pseudocode.evaluateNode,
       current: node.id,
       currentEdge: null,
       visitedEdges: neighborEdges.map(e => e.id),
+      confirmedEdges: [],
+      rejectedEdges: [],
     })
 
     let colorIndex = 0
     while (usedColors.has(COLORS[colorIndex])) colorIndex++
     nodeStates[node.id] = COLORS[colorIndex]
 
-    // step — nó colorido
     steps.push({
       nodeStates: { ...nodeStates },
       pseudocode: pseudocode.colorNode,
       current: node.id,
       currentEdge: null,
       visitedEdges: neighborEdges.map(e => e.id),
+      confirmedEdges: [],
+      rejectedEdges: [],
     })
   }
 
@@ -105,6 +110,8 @@ export function run(nodes, edges) {
     current: null,
     currentEdge: null,
     visitedEdges: [],
+    confirmedEdges: [],
+    rejectedEdges: [],
   })
 
   return steps
