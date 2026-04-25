@@ -28,10 +28,12 @@ export function canRun(nodes, edges, startNode) {
     })
   }
 
+  // verifica ciclo negativo apenas em arestas direcionadas
   for (const e of edges) {
     const w = e.weight ?? 1
-    if (dist[e.source] !== Infinity && dist[e.source] + w < dist[e.target]) return false
-    if (!e.directed && dist[e.target] !== Infinity && dist[e.target] + w < dist[e.source]) return false
+    if (e.directed) {
+      if (dist[e.source] !== Infinity && dist[e.source] + w < dist[e.target]) return false
+    }
   }
 
   return true

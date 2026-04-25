@@ -1,7 +1,8 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
   UNVISITED: 'unvisited',    // preto
-  IN_PATH: 'inPath',         // laranja — no caminho atual
+  IN_PATH: 'inPath',         // laranja — nó atual no caminho
+  VISITED: 'visited',        // azul — no caminho mas não é o atual
   CONFIRMED: 'confirmed',    // verde — confirmado no ciclo
   REJECTED: 'rejected',      // vermelho — descartado no backtrack
 }
@@ -77,6 +78,18 @@ export const pseudocode = {
 `nenhum ciclo hamiltoniano existe
   Hamiltoniano concluído`,
 
+}
+
+// ─── UTILITÁRIO — atualiza estados do path ────────────────────────
+// apenas o último nó do path fica laranja, os demais ficam azul
+function updatePathStates(nodeStates, path) {
+  path.forEach((id, idx) => {
+    if (idx === path.length - 1) {
+      nodeStates[id] = NODE_STATES.IN_PATH
+    } else {
+      nodeStates[id] = NODE_STATES.VISITED
+    }
+  })
 }
 
 // ─── EXECUÇÃO DO HAMILTONIANO ─────────────────────────────────────
@@ -171,17 +184,13 @@ export function run(nodes, edges, startNodeId) {
 
       visited.add(neighborId)
       path.push(neighborId)
-      nodeStates[neighborId] = NODE_STATES.IN_PATH
       visitedEdges.push(edge.id)
 
-      // remove da lista de rejeitados se estava lá — nó sendo revisitado
-      const rejNodeIdx = Object.keys(nodeStates).find(
-        id => Number(id) === neighborId && nodeStates[id] === NODE_STATES.REJECTED
-      )
-      if (rejNodeIdx !== undefined) nodeStates[neighborId] = NODE_STATES.IN_PATH
-
+      // remove de rejeitados se estava lá
       const rejEdgeIdx = rejectedEdges.indexOf(edge.id)
       if (rejEdgeIdx !== -1) rejectedEdges.splice(rejEdgeIdx, 1)
+
+      updatePathStates(nodeStates, path)
 
       steps.push({
         nodeStates: { ...nodeStates },
@@ -200,9 +209,11 @@ export function run(nodes, edges, startNodeId) {
       // backtrack — nó e aresta descartados
       path.pop()
       visited.delete(neighborId)
-      nodeStates[neighborId] = NODE_STATES.REJECTED
       visitedEdges.pop()
       rejectedEdges.push(edge.id)
+      nodeStates[neighborId] = NODE_STATES.REJECTED
+
+      updatePathStates(nodeStates, path)
 
       steps.push({
         nodeStates: { ...nodeStates },
