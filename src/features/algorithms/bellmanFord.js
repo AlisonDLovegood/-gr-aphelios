@@ -1,13 +1,10 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',   // preto
-  PROCESSING: 'processing', // laranja — sendo processado agora
-  VISITED: 'visited',       // azul — já visitado/processado
-  CONFIRMED: 'confirmed',   // verde — confirmado no resultado final
-  REJECTED: 'rejected',     // vermelho — descartado/rejeitado
+  UNVISITED: 'unvisited',
+  PROCESSING: 'processing',
+  VISITED: 'visited',
+  CONFIRMED: 'confirmed',
+  REJECTED: 'rejected',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 2) return false
@@ -18,154 +15,126 @@ export function canRun(nodes, edges, startNode) {
   nodes.forEach(n => { dist[n.id] = Infinity })
   dist[startNode] = 0
 
+  const expanded = []
+  edges.forEach(e => {
+    expanded.push(e)
+    if (!e.directed && e.source !== startNode)
+      expanded.push({ ...e, source: e.target, target: e.source })
+  })
+
   for (let i = 0; i < nodes.length - 1; i++) {
-    edges.forEach(e => {
+    expanded.forEach(e => {
       const w = e.weight ?? 1
       if (dist[e.source] !== Infinity && dist[e.source] + w < dist[e.target])
         dist[e.target] = dist[e.source] + w
-      if (!e.directed && dist[e.target] !== Infinity && dist[e.target] + w < dist[e.source])
-        dist[e.source] = dist[e.target] + w
     })
   }
 
-  // verifica ciclo negativo apenas em arestas direcionadas
-  for (const e of edges) {
+  for (const e of expanded) {
     const w = e.weight ?? 1
-    if (e.directed) {
-      if (dist[e.source] !== Infinity && dist[e.source] + w < dist[e.target]) return false
-    }
+    if (dist[e.source] !== Infinity && dist[e.source] + w < dist[e.target])
+      return false
   }
 
   return true
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
-
   init:
 `BellmanFord(Grafo, nó_inicial)
-  para cada nó de Grafo
-    nó.distancia = infinito
-    nó.predecessor = nulo
-  nó_inicial.distancia = 0`,
+  para cada nó
+    dist[nó] = infinito
+  dist[nó_inicial] = 0`,
 
   relax:
-`para cada aresta (u, v) com peso w
-  se u.distancia + w < v.distancia
-    v.distancia = u.distancia + w
-    v.predecessor = u`,
+`se dist[u] + w < dist[v]
+  dist[v] = dist[u] + w
+  predecessor[v] = u`,
 
   noRelax:
-`aresta não relaxada
-  u.distancia + w >= v.distancia`,
+`dist[u] + w >= dist[v]
+  não atualiza`,
 
   done:
-`todas as iterações concluídas
-BellmanFord concluído`,
-
+`BellmanFord concluído
+distâncias mínimas encontradas`,
 }
 
-// ─── EXECUÇÃO DO BELLMAN-FORD ─────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
   const nodeStates = {}
-  const distance = {}
+  const dist = {}
   const predecessor = {}
-  const confirmedEdges = []
-  const visitedEdges = []
-  const rejectedEdges = []
 
   nodes.forEach(n => {
     nodeStates[n.id] = NODE_STATES.UNVISITED
-    distance[n.id] = Infinity
+    dist[n.id] = Infinity
     predecessor[n.id] = null
   })
 
-  distance[startNodeId] = 0
-  nodeStates[startNodeId] = NODE_STATES.PROCESSING
+  dist[startNodeId] = 0
+
+  const expandedEdges = []
+  edges.forEach(e => {
+    expandedEdges.push(e)
+    if (!e.directed && e.source !== startNodeId)
+      expandedEdges.push({ ...e, source: e.target, target: e.source })
+  })
 
   steps.push({
     nodeStates: { ...nodeStates },
-    distance: { ...distance },
+    distance: { ...dist },
     pseudocode: pseudocode.init,
-    current: startNodeId,
+    current: null,
     currentEdge: null,
-    visitedEdges: [...visitedEdges],
-    confirmedEdges: [...confirmedEdges],
-    rejectedEdges: [...rejectedEdges],
+    visitedEdges: [],
+    confirmedEdges: [],
+    rejectedEdges: [],
   })
 
   for (let i = 0; i < nodes.length - 1; i++) {
     let anyRelaxed = false
 
-    for (const edge of edges) {
+    for (const edge of expandedEdges) {
       const w = edge.weight ?? 1
 
-      if (distance[edge.source] === Infinity) continue
+      if (dist[edge.source] === Infinity) continue
 
-      nodeStates[edge.source] = NODE_STATES.PROCESSING
-      nodeStates[edge.target] = NODE_STATES.PROCESSING
+      const candidate = dist[edge.source] + w
 
-      // tenta relaxar source → target
-      if (distance[edge.source] + w < distance[edge.target]) {
-        distance[edge.target] = distance[edge.source] + w
+      if (candidate < dist[edge.target]) {
+        dist[edge.target] = candidate
         predecessor[edge.target] = edge.source
         anyRelaxed = true
 
-        if (!visitedEdges.includes(edge.id)) visitedEdges.push(edge.id)
-        if (!confirmedEdges.includes(edge.id)) confirmedEdges.push(edge.id)
-
-        nodeStates[edge.source] = NODE_STATES.VISITED
-        nodeStates[edge.target] = NODE_STATES.VISITED
+        nodeStates[edge.source] = NODE_STATES.PROCESSING
+        nodeStates[edge.target] = NODE_STATES.PROCESSING
 
         steps.push({
           nodeStates: { ...nodeStates },
-          distance: { ...distance },
+          distance: { ...dist },
           pseudocode: pseudocode.relax,
           current: edge.target,
           currentEdge: edge.id,
-          visitedEdges: [...visitedEdges],
-          confirmedEdges: [...confirmedEdges],
-          rejectedEdges: [...rejectedEdges],
+          visitedEdges: [],
+          confirmedEdges: [],
+          rejectedEdges: [],
           checking: edge.target,
         })
-
-      } else {
-        // aresta não relaxada — nó target descartado
-        nodeStates[edge.source] = NODE_STATES.VISITED
-        if (!rejectedEdges.includes(edge.id)) rejectedEdges.push(edge.id)
-
-        steps.push({
-          nodeStates: { ...nodeStates },
-          distance: { ...distance },
-          pseudocode: pseudocode.noRelax,
-          current: null,
-          currentEdge: edge.id,
-          visitedEdges: [...visitedEdges],
-          confirmedEdges: [...confirmedEdges],
-          rejectedEdges: [...rejectedEdges],
-        })
-      }
-
-      // tenta relaxar target → source se não direcionada
-      if (!edge.directed && distance[edge.target] !== Infinity && distance[edge.target] + w < distance[edge.source]) {
-        distance[edge.source] = distance[edge.target] + w
-        predecessor[edge.source] = edge.target
-        anyRelaxed = true
 
         nodeStates[edge.source] = NODE_STATES.VISITED
         nodeStates[edge.target] = NODE_STATES.VISITED
 
+      } else {
         steps.push({
           nodeStates: { ...nodeStates },
-          distance: { ...distance },
-          pseudocode: pseudocode.relax,
-          current: edge.source,
+          distance: { ...dist },
+          pseudocode: pseudocode.noRelax,
+          current: null,
           currentEdge: edge.id,
-          visitedEdges: [...visitedEdges],
-          confirmedEdges: [...confirmedEdges],
-          rejectedEdges: [...rejectedEdges],
-          checking: edge.source,
+          visitedEdges: [],
+          confirmedEdges: [],
+          rejectedEdges: [],
         })
       }
     }
@@ -173,17 +142,37 @@ export function run(nodes, edges, startNodeId) {
     if (!anyRelaxed) break
   }
 
+  const confirmedEdges = []
   nodes.forEach(n => {
-    if (distance[n.id] !== Infinity) nodeStates[n.id] = NODE_STATES.CONFIRMED
+    if (predecessor[n.id] !== null) {
+      const e = edges.find(ed =>
+        (!ed.directed && (
+          (ed.source === predecessor[n.id] && ed.target === n.id) ||
+          (ed.source === n.id && ed.target === predecessor[n.id])
+        )) ||
+        (ed.directed && ed.source === predecessor[n.id] && ed.target === n.id)
+      )
+      if (e && !confirmedEdges.includes(e.id)) confirmedEdges.push(e.id)
+    }
+  })
+
+  const rejectedEdges = edges
+    .filter(e => !confirmedEdges.includes(e.id))
+    .map(e => e.id)
+
+  nodes.forEach(n => {
+    nodeStates[n.id] = dist[n.id] !== Infinity
+      ? NODE_STATES.CONFIRMED
+      : NODE_STATES.UNVISITED
   })
 
   steps.push({
     nodeStates: { ...nodeStates },
-    distance: { ...distance },
+    distance: { ...dist },
     pseudocode: pseudocode.done,
     current: null,
     currentEdge: null,
-    visitedEdges: [...visitedEdges],
+    visitedEdges: [],
     confirmedEdges: [...confirmedEdges],
     rejectedEdges: [...rejectedEdges],
   })
