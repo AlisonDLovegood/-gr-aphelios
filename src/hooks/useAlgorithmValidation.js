@@ -7,8 +7,8 @@ import { canRun as eulerCanRun, run as eulerRun } from '../features/algorithms/e
 import { canRun as primCanRun, run as primRun } from '../features/algorithms/prim'
 import { canRun as kruskalCanRun, run as kruskalRun } from '../features/algorithms/kruskal'
 import { canRun as bfCanRun, run as bfRun } from '../features/algorithms/bellmanFord'
+import { canRun as dijkstraCanRun, run as dijkstraRun } from '../features/algorithms/dijkstra'
 // import { canRun as fwCanRun, run as fwRun } from '../features/algorithms/floydWarshall'
-// import { canRun as dijkstraCanRun, run as dijkstraRun } from '../features/algorithms/dijkstra'
 
 function useAlgorithmValidation() {
   const nodes = useGraphStore((state) => state.nodes)
@@ -24,8 +24,8 @@ function useAlgorithmValidation() {
     { id: 'prim', label: 'Prim', canRun: primCanRun(nodes, edges, startNode), run: () => primRun(nodes, edges, startNode) },
     { id: 'kruskal', label: 'Kruskal', canRun: kruskalCanRun(nodes, edges, startNode), run: () => kruskalRun(nodes, edges, startNode) },  
     { id: 'bellmanFord', label: 'Bellman-Ford', canRun: bfCanRun(nodes, edges, startNode), run: () => bfRun(nodes, edges, startNode) },  
+    { id: 'dijkstra', label: 'Dijkstra', canRun: dijkstraCanRun(nodes, edges, startNode), run: () => dijkstraRun(nodes, edges, startNode) },  
     // { id: 'floydWarshall', label: 'Floyd-Warshall', canRun: fwCanRun(nodes, edges, startNode), run: () => fwRun(nodes, edges, startNode) },  
-    // { id: 'dijkstra', label: 'Dijkstra', canRun: dijkstraCanRun(nodes, edges, startNode), run: () => dijkstraRun(nodes, edges, startNode) },  
   ]
 }
 
