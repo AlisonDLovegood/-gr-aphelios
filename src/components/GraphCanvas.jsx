@@ -112,7 +112,6 @@ function GraphCanvas() {
     setEdgeDialog(null)
   }
 
-  // retorna a cor do nó baseado no estado do step atual do algoritmo
   const getNodeColor = (nodeId) => {
     if (!isRunning || steps.length === 0) return 'black'
     const state = steps[currentStep]?.nodeStates?.[nodeId]
@@ -124,7 +123,7 @@ function GraphCanvas() {
     if (state === 'inQueue') return 'gray'
     if (state === 'inPath') return 'orange'
     if (state === 'inTree') return 'green'
-    if (state.startsWith('#')) return state 
+    if (state.startsWith('#')) return state
     return 'black'
   }
 
@@ -132,6 +131,7 @@ function GraphCanvas() {
     if (!isRunning || steps.length === 0) return 'black'
     const step = steps[currentStep]
     if (step?.currentEdge === edgeId) return 'orange'
+    if (step?.currentEdges?.includes(edgeId)) return 'orange'
     if (step?.confirmedEdges?.includes(edgeId)) return 'green'
     if (step?.rejectedEdges?.includes(edgeId)) return 'red'
     if (step?.visitedEdges?.includes(edgeId)) return '#1565c0'
@@ -140,13 +140,11 @@ function GraphCanvas() {
 
   // ─── UTILITÁRIOS DE GEOMETRIA ─────────────────────────────────────
 
-  // seta aponta para o nó target quando a aresta é direcionada
   const getMarker = (edge) => {
     if (!edge.directed) return { markerStart: null, markerEnd: null }
     return { markerStart: null, markerEnd: 'url(#arrowhead)' }
   }
 
-  // calcula o texto do peso usando deslocamento perpendicular à linha — tangente
   const renderWeight = (x1, y1, x2, y2, weight, offset = -15) => {
     if (weight === null) return null
     const angle = Math.atan2(y2 - y1, x2 - x1)
@@ -176,7 +174,6 @@ function GraphCanvas() {
     const { markerStart, markerEnd } = getMarker(edge)
     const edgeColor = getEdgeColor(edge.id)
 
-    // caso 1 — self-loop
     if (isSelfLoop) {
       const loopRadius = 25
       const lx = source.x - 10
@@ -194,7 +191,6 @@ function GraphCanvas() {
       )
     }
 
-    // caso 2 — arestas paralelas: curva de Bézier quadrática
     if (hasParallel) {
       const nodeA = Math.min(edge.source, edge.target)
       const nodeB = Math.max(edge.source, edge.target)
@@ -239,12 +235,39 @@ function GraphCanvas() {
       )
     }
 
-    // caso 3 — linha reta simples
     return (
       <g key={edge.id}>
         <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke={edgeColor} strokeWidth={2} pointerEvents="none" markerStart={markerStart} markerEnd={markerEnd} />
         {renderWeight(source.x, source.y, target.x, target.y, edge.weight)}
         <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke="transparent" strokeWidth={12} onClick={(e) => handleEdgeClick(e, edge.id)} style={{ cursor: 'pointer' }} />
+      </g>
+    )
+  }
+
+  // ─── RENDER DE ARESTAS VIRTUAIS ───────────────────────────────────
+
+  const renderVirtualEdge = (ve, idx) => {
+    const source = nodes.find(n => n.id === ve.source)
+    const target = nodes.find(n => n.id === ve.target)
+    if (!source || !target) return null
+
+    const angle = Math.atan2(target.y - source.y, target.x - source.x)
+    const tx = (source.x + target.x) / 2 - Math.sin(angle) * (-15)
+    const ty = (source.y + target.y) / 2 + Math.cos(angle) * (-15)
+
+    return (
+      <g key={`virtual-${idx}`}>
+        <line
+          x1={source.x} y1={source.y}
+          x2={target.x} y2={target.y}
+          stroke="#1565c0"
+          strokeWidth={2}
+          strokeDasharray="6 3"
+          pointerEvents="none"
+        />
+        <text x={tx} y={ty} textAnchor="middle" fontSize={14} fill="#1565c0" pointerEvents="none">
+          {ve.weight}
+        </text>
       </g>
     )
   }
@@ -268,12 +291,14 @@ function GraphCanvas() {
         onMouseMove={handleSvgMouseMove}
         onMouseUp={handleSvgMouseUp}
       >
-
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="16" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="black" />
           </marker>
         </defs>
+
+        {/* arestas virtuais — renderizadas abaixo das reais */}
+        {isRunning && steps[currentStep]?.virtualEdges?.map((ve, idx) => renderVirtualEdge(ve, idx))}
 
         {edges.map((edge) => renderEdge(edge))}
 
@@ -283,12 +308,13 @@ function GraphCanvas() {
               cx={node.x} cy={node.y} r={15}
               fill={
                 sourceNode === node.id ? 'orange' :
-                  draggingNode === node.id ? 'gray' :
-                    getNodeColor(node.id)
+                draggingNode === node.id ? 'gray' :
+                getNodeColor(node.id)
               }
               stroke={
+                steps[currentStep]?.current === node.id ||
                 steps[currentStep]?.checking === node.id ||
-                  steps[currentStep]?.current === node.id
+                steps[currentStep]?.currentNodes?.includes(node.id)
                   ? 'orange' : 'none'
               }
               strokeWidth={3}
@@ -307,15 +333,18 @@ function GraphCanvas() {
                 {steps[currentStep].distance[node.id]}
               </text>
             )}
+            {isRunning && steps[currentStep]?.current === node.id && (
+              <text x={node.x} y={node.y + 5} textAnchor="middle" fontSize={14} fill="white" fontWeight="bold" pointerEvents="none">
+                K
+              </text>
+            )}
             <text x={node.x} y={node.y - 26} textAnchor="middle" fontSize={20} fill="black" pointerEvents="none">
               {node.label}
             </text>
           </g>
         ))}
-
       </svg>
 
-      {/* POPUP DO NÓ */}
       <Dialog open={Boolean(nodeDialog)} onClose={() => setNodeDialog(null)}>
         <DialogTitle>Editar nó</DialogTitle>
         <DialogContent>
@@ -327,7 +356,6 @@ function GraphCanvas() {
         </DialogActions>
       </Dialog>
 
-      {/* POPUP DA ARESTA */}
       <Dialog open={Boolean(edgeDialog)} onClose={() => setEdgeDialog(null)}>
         <DialogTitle>Editar Aresta</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -354,7 +382,6 @@ function GraphCanvas() {
           <Button onClick={handleEdgeDialogConfirm} variant="contained">Confirmar</Button>
         </DialogActions>
       </Dialog>
-
     </Box>
   )
 }
