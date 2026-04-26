@@ -234,13 +234,15 @@ export function run(nodes, edges) {
     })
   }
 
-  // step final — todos os nós confirmados e arestas virtuais para pares sem ligação direta
+  // step final
   nodes.forEach(n => {
     const reachable = nodes.some(m => m.id !== n.id && dist[n.id][m.id] !== Infinity)
     nodeStates[n.id] = reachable ? NODE_STATES.CONFIRMED : NODE_STATES.UNVISITED
   })
 
-  // gera arestas virtuais para pares sem aresta direta
+  // gera arestas virtuais para:
+  // 1. pares sem aresta direta mas com caminho calculado
+  // 2. pares com aresta direta mas onde o caminho via k é mais curto
   const virtualEdges = []
   const seen = new Set()
   nodes.forEach(i => {
@@ -250,8 +252,9 @@ export function run(nodes, edges) {
       const key = `${Math.min(i.id, j.id)}-${Math.max(i.id, j.id)}`
       if (seen.has(key)) return
       seen.add(key)
-      const hasDirectEdge = findEdge(edges, i.id, j.id)
-      if (!hasDirectEdge) {
+      const directEdge = findEdge(edges, i.id, j.id)
+      const directWeight = directEdge ? (directEdge.weight ?? 1) : Infinity
+      if (!directEdge || dist[i.id][j.id] < directWeight) {
         virtualEdges.push({
           source: i.id,
           target: j.id,
