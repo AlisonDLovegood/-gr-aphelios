@@ -57,6 +57,8 @@ export function run(nodes, edges) {
     pseudocode: pseudocode.init,
     current: null,
     currentEdge: null,
+    currentEdges: [],
+    currentNodes: [],
     visitedEdges: [],
     confirmedEdges: [],
     rejectedEdges: [],
@@ -64,41 +66,47 @@ export function run(nodes, edges) {
 
   for (const node of nodes) {
 
-    // coloração considera todos os vizinhos independente da direção
     const neighborEdges = edges.filter(e =>
       e.source === node.id || e.target === node.id
     )
 
-    const neighbors = neighborEdges.map(e =>
+    const neighborIds = neighborEdges.map(e =>
       e.source === node.id ? e.target : e.source
     )
 
     const usedColors = new Set(
-      neighbors
-        .map(neighborId => nodeStates[neighborId])
+      neighborIds
+        .map(id => nodeStates[id])
         .filter(color => color !== 'unvisited' && color !== null)
     )
 
+    // step 1 — k com label K, vizinhos com borda laranja, arestas laranjas
     steps.push({
       nodeStates: { ...nodeStates },
       pseudocode: pseudocode.evaluateNode,
-      current: node.id,
+      current: node.id,               // mostra label K no nó atual
       currentEdge: null,
-      visitedEdges: neighborEdges.map(e => e.id),
+      currentEdges: neighborEdges.map(e => e.id), // arestas laranjas
+      currentNodes: [...neighborIds], // borda laranja nos vizinhos
+      visitedEdges: [],
       confirmedEdges: [],
       rejectedEdges: [],
     })
 
+    // escolhe a cor
     let colorIndex = 0
     while (usedColors.has(COLORS[colorIndex])) colorIndex++
     nodeStates[node.id] = COLORS[colorIndex]
 
+    // step 2 — k recebe a cor, vizinhos mantêm borda
     steps.push({
       nodeStates: { ...nodeStates },
       pseudocode: pseudocode.colorNode,
       current: node.id,
       currentEdge: null,
-      visitedEdges: neighborEdges.map(e => e.id),
+      currentEdges: neighborEdges.map(e => e.id),
+      currentNodes: [...neighborIds],
+      visitedEdges: [],
       confirmedEdges: [],
       rejectedEdges: [],
     })
@@ -109,6 +117,8 @@ export function run(nodes, edges) {
     pseudocode: pseudocode.done,
     current: null,
     currentEdge: null,
+    currentEdges: [],
+    currentNodes: [],
     visitedEdges: [],
     confirmedEdges: [],
     rejectedEdges: [],

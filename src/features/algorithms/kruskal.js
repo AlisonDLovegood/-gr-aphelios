@@ -152,6 +152,11 @@ export function run(nodes, edges, startNodeId) {
     if (confirmedEdges.length === nodes.length - 1) break
   }
 
+  // arestas restantes que não foram avaliadas também ficam vermelhas
+  const allRejected = edges
+    .filter(e => !confirmedEdges.includes(e.id))
+    .map(e => e.id)
+
   steps.push({
     nodeStates: { ...nodeStates },
     pseudocode: pseudocode.done,
@@ -159,7 +164,7 @@ export function run(nodes, edges, startNodeId) {
     currentEdge: null,
     visitedEdges: [],
     confirmedEdges: [...confirmedEdges],
-    rejectedEdges: [...rejectedEdges],
+    rejectedEdges: [...allRejected],
   })
 
   return steps

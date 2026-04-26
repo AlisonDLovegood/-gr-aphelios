@@ -173,7 +173,7 @@ function GraphCanvas() {
     const isSelfLoop = edge.source === edge.target
 
     if (isSelfLoop) {
-      if (isVirtual) return null // self-loop virtual não faz sentido
+      if (isVirtual) return null
       const loopRadius = 25
       const lx = source.x - 10
       const ly = source.y - 18
@@ -264,7 +264,6 @@ function GraphCanvas() {
 
   const virtualEdges = (isRunning && steps[currentStep]?.virtualEdges) || []
 
-  // pool unificado: reais primeiro, virtuais depois (ordem importa para curveAmount)
   const allEdges = [
     ...edges,
     ...virtualEdges.map((ve, idx) => ({
@@ -303,12 +302,7 @@ function GraphCanvas() {
                 draggingNode === node.id ? 'gray' :
                 getNodeColor(node.id)
               }
-              stroke={
-                steps[currentStep]?.current === node.id ||
-                steps[currentStep]?.checking === node.id ||
-                steps[currentStep]?.currentNodes?.includes(node.id)
-                  ? 'orange' : 'none'
-              }
+              stroke="none"
               strokeWidth={3}
               onClick={(e) => handleNodeClick(e, node.id)}
               onMouseDown={(e) => handleNodeMouseDown(e, node.id)}

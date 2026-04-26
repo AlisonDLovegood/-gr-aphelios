@@ -1,7 +1,8 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
   UNVISITED: 'unvisited',    // preto
-  PROCESSING: 'processing',  // laranja — sendo avaliado
+  PROCESSING: 'processing',  // laranja — sendo avaliado agora
+  VISITED: 'visited',        // azul — avaliado mas não escolhido
   IN_TREE: 'inTree',         // verde — confirmado na árvore
 }
 
@@ -37,13 +38,12 @@ export const pseudocode = {
   nó_inicial.estado = na_árvore`,
 
   evaluateEdge:
-`para cada aresta (u, v) onde u está na árvore e v não está
-  candidatas.adicionar(aresta com menor peso)`,
+`avaliando aresta candidata (u, v)
+  comparando com menor encontrada até agora`,
 
   addToTree:
-`aresta_mínima = menor aresta candidata
-  adicionar nó de destino à árvore
-  adicionar aresta à árvore geradora`,
+`aresta_mínima escolhida
+  adicionar nó e aresta à árvore`,
 
   done:
 `todos os nós estão na árvore
@@ -67,10 +67,10 @@ export function run(nodes, edges, startNodeId) {
   steps.push({
     nodeStates: { ...nodeStates },
     pseudocode: pseudocode.init,
-    current: startNodeId,
+    current: null,
     currentEdge: null,
     visitedEdges: [],
-    confirmedEdges: [...confirmedEdges],
+    confirmedEdges: [],
     rejectedEdges: [],
   })
 
@@ -84,45 +84,61 @@ export function run(nodes, edges, startNodeId) {
 
     if (candidateEdges.length === 0) break
 
-    // step — avaliando arestas candidatas
-    steps.push({
-      nodeStates: { ...nodeStates },
-      pseudocode: pseudocode.evaluateEdge,
-      current: null,
-      currentEdge: null,
-      visitedEdges: candidateEdges.map(e => e.id),
-      confirmedEdges: [...confirmedEdges],
-      rejectedEdges: [],
-    })
+    const minEdge = candidateEdges.reduce((min, e) =>
+      (e.weight ?? 1) < (min.weight ?? 1) ? e : min
+    )
 
-    const minEdge = candidateEdges.reduce((min, e) => {
-      const w = e.weight ?? 1
-      return w < (min.weight ?? 1) ? e : min
-    })
+    const visitedEdgesThisRound = []
+
+    for (const edge of candidateEdges) {
+      const candidateNode = inTree.has(edge.source) ? edge.target : edge.source
+
+      nodeStates[candidateNode] = NODE_STATES.PROCESSING
+
+      steps.push({
+        nodeStates: { ...nodeStates },
+        pseudocode: pseudocode.evaluateEdge,
+        current: null,
+        currentEdge: edge.id,
+        visitedEdges: [...visitedEdgesThisRound],
+        confirmedEdges: [...confirmedEdges],
+        rejectedEdges: [],
+      })
+
+      if (edge.id !== minEdge.id) {
+        nodeStates[candidateNode] = NODE_STATES.VISITED
+        visitedEdgesThisRound.push(edge.id)
+      }
+    }
 
     const newNode = inTree.has(minEdge.source) ? minEdge.target : minEdge.source
     inTree.add(newNode)
-    nodeStates[newNode] = NODE_STATES.PROCESSING
     confirmedEdges.push(minEdge.id)
 
-    // step — adiciona nó e aresta à árvore
-    steps.push({
-      nodeStates: { ...nodeStates },
-      pseudocode: pseudocode.addToTree,
-      current: newNode,
-      currentEdge: minEdge.id,
-      visitedEdges: [],
-      confirmedEdges: [...confirmedEdges],
-      rejectedEdges: [],
-      checking: newNode,
+    candidateEdges.forEach(e => {
+      const candidateNode = inTree.has(e.source) ? e.target : e.source
+      if (candidateNode !== newNode && nodeStates[candidateNode] === NODE_STATES.VISITED) {
+        nodeStates[candidateNode] = NODE_STATES.UNVISITED
+      }
     })
 
     nodeStates[newNode] = NODE_STATES.IN_TREE
+
+    steps.push({
+      nodeStates: { ...nodeStates },
+      pseudocode: pseudocode.addToTree,
+      current: null,
+      currentEdge: null,
+      visitedEdges: [],
+      confirmedEdges: [...confirmedEdges],
+      rejectedEdges: [],
+    })
   }
 
-  nodes.forEach(n => {
-    if (inTree.has(n.id)) nodeStates[n.id] = NODE_STATES.IN_TREE
-  })
+  // arestas que não fazem parte da árvore ficam vermelhas
+  const rejectedEdges = edges
+    .filter(e => !confirmedEdges.includes(e.id))
+    .map(e => e.id)
 
   steps.push({
     nodeStates: { ...nodeStates },
@@ -131,7 +147,7 @@ export function run(nodes, edges, startNodeId) {
     currentEdge: null,
     visitedEdges: [],
     confirmedEdges: [...confirmedEdges],
-    rejectedEdges: [],
+    rejectedEdges: [...rejectedEdges],
   })
 
   return steps

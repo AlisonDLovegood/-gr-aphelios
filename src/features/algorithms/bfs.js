@@ -87,6 +87,19 @@ export function run(nodes, edges, startNodeId) {
     const current = queue.shift()
     nodeStates[current] = NODE_STATES.PROCESSING
 
+    // vizinhos ainda não visitados ficam cinzas ao revelar o current
+    const neighborEdges = edges.filter(e => {
+      if (!e.directed) return e.source === current || e.target === current
+      return e.source === current
+    })
+
+    neighborEdges.forEach(edge => {
+      const neighborId = edge.source === current ? edge.target : edge.source
+      if (nodeStates[neighborId] === NODE_STATES.UNVISITED) {
+        nodeStates[neighborId] = NODE_STATES.IN_QUEUE
+      }
+    })
+
     steps.push({
       nodeStates: { ...nodeStates },
       distance: { ...distance },
@@ -99,17 +112,14 @@ export function run(nodes, edges, startNodeId) {
       rejectedEdges: [],
     })
 
-    const neighborEdges = edges.filter(e => {
-      if (!e.directed) return e.source === current || e.target === current
-      return e.source === current
-    })
-
     for (const edge of neighborEdges) {
       const neighborId = edge.source === current ? edge.target : edge.source
 
-      if (nodeStates[neighborId] === NODE_STATES.UNVISITED) {
+      if (nodeStates[neighborId] === NODE_STATES.IN_QUEUE && !queue.includes(neighborId)) {
+        // vizinho ainda não enfileirado — avaliar agora
 
-        nodeStates[neighborId] = NODE_STATES.IN_QUEUE
+        // step: aresta laranja + vizinho laranja
+        nodeStates[neighborId] = NODE_STATES.PROCESSING
         distance[neighborId] = distance[current] + 1
         predecessor[neighborId] = current
         queue.push(neighborId)
@@ -127,6 +137,9 @@ export function run(nodes, edges, startNodeId) {
           confirmedEdges: [],
           rejectedEdges: [],
         })
+
+        // após o step, volta para cinza — está na fila mas não sendo processado
+        nodeStates[neighborId] = NODE_STATES.IN_QUEUE
       }
     }
 

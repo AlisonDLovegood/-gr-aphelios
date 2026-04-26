@@ -1,6 +1,7 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
   UNVISITED: 'unvisited',    // preto
+  IN_QUEUE: 'inQueue',       // cinza — vizinho revelado
   IN_PATH: 'inPath',         // laranja — nó atual no caminho
   VISITED: 'visited',        // azul — no caminho mas não é o atual
   CONFIRMED: 'confirmed',    // verde — confirmado no ciclo
@@ -81,7 +82,6 @@ export const pseudocode = {
 }
 
 // ─── UTILITÁRIO — atualiza estados do path ────────────────────────
-// apenas o último nó do path fica laranja, os demais ficam azul
 function updatePathStates(nodeStates, path) {
   path.forEach((id, idx) => {
     if (idx === path.length - 1) {
@@ -178,6 +178,14 @@ export function run(nodes, edges, startNodeId) {
       return e.source === current
     })
 
+    // marca vizinhos não visitados como cinza ao revelar o current
+    neighborEdges.forEach(edge => {
+      const neighborId = edge.source === current ? edge.target : edge.source
+      if (!visited.has(neighborId) && nodeStates[neighborId] === NODE_STATES.UNVISITED) {
+        nodeStates[neighborId] = NODE_STATES.IN_QUEUE
+      }
+    })
+
     for (const edge of neighborEdges) {
       const neighborId = edge.source === current ? edge.target : edge.source
       if (visited.has(neighborId)) continue
@@ -186,7 +194,6 @@ export function run(nodes, edges, startNodeId) {
       path.push(neighborId)
       visitedEdges.push(edge.id)
 
-      // remove de rejeitados se estava lá
       const rejEdgeIdx = rejectedEdges.indexOf(edge.id)
       if (rejEdgeIdx !== -1) rejectedEdges.splice(rejEdgeIdx, 1)
 

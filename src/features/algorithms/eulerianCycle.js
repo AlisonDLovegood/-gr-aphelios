@@ -1,6 +1,7 @@
 // ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
   UNVISITED: 'unvisited',    // preto
+  IN_QUEUE: 'inQueue',       // cinza — vizinho revelado
   PROCESSING: 'processing',  // laranja — sendo percorrido
   VISITED: 'visited',        // azul — já percorrido
   CONFIRMED: 'confirmed',    // verde — confirmado no circuito
@@ -106,6 +107,14 @@ export function run(nodes, edges, startNodeId) {
       )
     )
 
+    // marca vizinhos não visitados como cinza ao revelar o current
+    availableEdges.forEach(edge => {
+      const next = edge.source === current ? edge.target : edge.source
+      if (nodeStates[next] === NODE_STATES.UNVISITED) {
+        nodeStates[next] = NODE_STATES.IN_QUEUE
+      }
+    })
+
     for (const edge of availableEdges) {
       const next = edge.source === current ? edge.target : edge.source
 
@@ -115,9 +124,10 @@ export function run(nodes, edges, startNodeId) {
       const prev = current
       current = next
 
-      // remove de rejeitadas se estava lá
       const rejEdgeIdx = rejectedEdgesList.indexOf(edge.id)
       if (rejEdgeIdx !== -1) rejectedEdgesList.splice(rejEdgeIdx, 1)
+
+      // vizinho laranja ao ser avaliado
       nodeStates[next] = NODE_STATES.PROCESSING
       circuit.push(current)
 
