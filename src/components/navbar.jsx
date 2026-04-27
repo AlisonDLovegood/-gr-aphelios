@@ -9,6 +9,12 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import AdbIcon from '@mui/icons-material/Adb';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import AddIcon from '@mui/icons-material/Add';
@@ -17,6 +23,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import WindowIcon from '@mui/icons-material/Window';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { exportGraph } from '../features/io/exportGraph';
+import { handleImportGraph } from '../features/io/importGraph';
 
 const academyItems = ['Monografia', 'GitHub'];
 
@@ -25,33 +33,59 @@ const actionItems = [
     value: 'Importar',
     icon: <UploadIcon />,
     itemsMenu: [
-      { label: 'Importar Grafo', icon: <UploadIcon /> },
-      { label: 'Importar Matriz de Adjacência', icon: <DashboardCustomizeIcon /> },
+      { label: 'Importar Grafo', icon: <UploadIcon />, action: 'openImportGraph' },
+      { label: 'Importar Matriz de Adjacência', icon: <DashboardCustomizeIcon />, action: null },
     ]
   },
   {
     value: 'Exportar',
     icon: <DownloadIcon />,
     itemsMenu: [
-      { label: 'Exportar Grafo', icon: <DownloadIcon /> },
-      { label: 'Exportar Matriz de Adjacência', icon: <WindowIcon /> },
+      { label: 'Exportar Grafo', icon: <DownloadIcon />, action: exportGraph },
+      { label: 'Exportar Matriz de Adjacência', icon: <WindowIcon />, action: null },
     ]
   },
   {
     value: 'grafo',
     icon: <WidgetsIcon />,
     itemsMenu: [
-      { label: 'Novo Grafo', icon: <AddIcon /> },
-      { label: 'Limpar Canvas', icon: <DeleteOutlineIcon /> },
+      { label: 'Novo Grafo', icon: <AddIcon />, action: null },
+      { label: 'Limpar Canvas', icon: <DeleteOutlineIcon />, action: null },
     ]
   },
 ]
 
 function Navbar() {
   const [anchors, setAnchors] = React.useState({});
+  const [importDialogOpen, setImportDialogOpen] = React.useState(false);
+  const [selectedFile, setSelectedFile] = React.useState(null);
+  const [errorMessage, setErrorMessage] = React.useState(null);
 
   const handleOpen = (event, value) => setAnchors((prev) => ({ ...prev, [value]: event.currentTarget }));
   const handleClose = (value) => setAnchors((prev) => ({ ...prev, [value]: null }));
+
+  const handleMenuAction = (value, action) => {
+    handleClose(value)
+    if (action === 'openImportGraph') setImportDialogOpen(true)
+    else if (typeof action === 'function') action()
+  }
+
+  const handleImportConfirm = async () => {
+    const error = await handleImportGraph(selectedFile)
+    if (error) {
+      setImportDialogOpen(false)
+      setSelectedFile(null)
+      setErrorMessage(error)
+    } else {
+      setSelectedFile(null)
+      setImportDialogOpen(false)
+    }
+  }
+
+  const handleImportCancel = () => {
+    setSelectedFile(null)
+    setImportDialogOpen(false)
+  }
 
   return (
     <AppBar position="static" sx={{ borderRadius: '8px', mb: 2 }}>
@@ -98,7 +132,10 @@ function Navbar() {
                   sx={{ mt: '8px' }}
                 >
                   {item.itemsMenu.map((menuItem) => (
-                    <MenuItem key={menuItem.label} onClick={() => handleClose(item.value)}>
+                    <MenuItem
+                      key={menuItem.label}
+                      onClick={() => handleMenuAction(item.value, menuItem.action)}
+                    >
                       <ListItemIcon>{menuItem.icon}</ListItemIcon>
                       <Typography>{menuItem.label}</Typography>
                     </MenuItem>
@@ -111,6 +148,39 @@ function Navbar() {
 
         </Toolbar>
       </Container>
+
+      {/* Dialog — Importar Grafo */}
+      <Dialog open={importDialogOpen} onClose={handleImportCancel}>
+        <DialogTitle>Importar arquivo .JSON</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, pt: 2 }}>
+          <Button variant="outlined" component="label">
+            {selectedFile ? selectedFile.name : 'Selecionar arquivo'}
+            <input
+              type="file"
+              accept=".json"
+              hidden
+              onChange={(e) => setSelectedFile(e.target.files[0] ?? null)}
+            />
+          </Button>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleImportCancel}>Cancelar</Button>
+          <Button onClick={handleImportConfirm} variant="contained" disabled={!selectedFile}>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog — Erro de importação */}
+      <Dialog open={Boolean(errorMessage)} onClose={() => setErrorMessage(null)}>
+        <DialogContent sx={{ p: 0 }}>
+          <Alert severity="error" onClose={() => setErrorMessage(null)}>
+            <AlertTitle>Arquivo inválido</AlertTitle>
+            {errorMessage}
+          </Alert>
+        </DialogContent>
+      </Dialog>
+
     </AppBar>
   );
 }
