@@ -279,6 +279,7 @@ function GraphCanvas() {
   return (
     <Box ref={containerRef} sx={{ height: '100%', border: '1px solid black', borderRadius: '7px', mb: 2, overflow: 'hidden' }}>
       <svg
+        id="graph-svg"
         width={dimensions.width}
         height={dimensions.height}
         onClick={handleCanvaClick}
@@ -299,8 +300,8 @@ function GraphCanvas() {
               cx={node.x} cy={node.y} r={15}
               fill={
                 sourceNode === node.id ? 'orange' :
-                draggingNode === node.id ? 'gray' :
-                getNodeColor(node.id)
+                  draggingNode === node.id ? 'gray' :
+                    getNodeColor(node.id)
               }
               stroke="none"
               strokeWidth={3}

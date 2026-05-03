@@ -15,47 +15,21 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import AdbIcon from '@mui/icons-material/Adb';
 import WidgetsIcon from '@mui/icons-material/Widgets';
-import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import DownloadIcon from '@mui/icons-material/Download';
-import WindowIcon from '@mui/icons-material/Window';
-import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import ImageIcon from '@mui/icons-material/Image';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { exportGraph } from '../features/io/exportGraph';
+import { exportPNG } from '../features/io/exportPNG';
 import { handleImportGraph } from '../features/io/importGraph';
+import useGraphStore from '../store/GraphStore';
+import logo from '../assets/logo-2.png';
 
 const academyItems = ['Monografia', 'GitHub'];
 
-const actionItems = [
-  {
-    value: 'Importar',
-    icon: <UploadIcon />,
-    itemsMenu: [
-      { label: 'Importar Grafo', icon: <UploadIcon />, action: 'openImportGraph' },
-      { label: 'Importar Matriz de Adjacência', icon: <DashboardCustomizeIcon />, action: null },
-    ]
-  },
-  {
-    value: 'Exportar',
-    icon: <DownloadIcon />,
-    itemsMenu: [
-      { label: 'Exportar Grafo', icon: <DownloadIcon />, action: exportGraph },
-      { label: 'Exportar Matriz de Adjacência', icon: <WindowIcon />, action: null },
-    ]
-  },
-  {
-    value: 'grafo',
-    icon: <WidgetsIcon />,
-    itemsMenu: [
-      { label: 'Novo Grafo', icon: <AddIcon />, action: null },
-      { label: 'Limpar Canvas', icon: <DeleteOutlineIcon />, action: null },
-    ]
-  },
-]
-
 function Navbar() {
+  const clearCanvas = useGraphStore((state) => state.clearCanvas)
   const [anchors, setAnchors] = React.useState({});
   const [importDialogOpen, setImportDialogOpen] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState(null);
@@ -87,12 +61,37 @@ function Navbar() {
     setImportDialogOpen(false)
   }
 
+  const actionItems = [
+    {
+      value: 'Importar',
+      icon: <UploadIcon />,
+      itemsMenu: [
+        { label: 'Importar Grafo', icon: <UploadIcon />, action: 'openImportGraph' },
+      ]
+    },
+    {
+      value: 'Exportar',
+      icon: <DownloadIcon />,
+      itemsMenu: [
+        { label: 'Exportar Grafo', icon: <DownloadIcon />, action: exportGraph },
+        { label: 'Exportar Imagem (PNG)', icon: <ImageIcon />, action: exportPNG },
+      ]
+    },
+    {
+      value: 'grafo',
+      icon: <WidgetsIcon />,
+      itemsMenu: [
+        { label: 'Limpar Canvas', icon: <DeleteOutlineIcon />, action: clearCanvas },
+      ]
+    },
+  ]
+
   return (
     <AppBar position="static" sx={{ borderRadius: '8px', mb: 2 }}>
       <Container maxWidth="1980">
         <Toolbar sx={{ gap: 2 }}>
 
-          <AdbIcon />
+          <img src={logo} alt="logo" style={{ height: 50, width: 'auto' }} />
 
           <Typography
             variant="h6"
