@@ -1,12 +1,9 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',   // preto
-  IN_QUEUE: 'inQueue',      // cinza — em fila
-  PROCESSING: 'processing', // laranja — sendo processado
-  VISITED: 'visited',       // azul — já visitado
+  UNVISITED: 'unvisited',
+  IN_QUEUE: 'inQueue',
+  PROCESSING: 'processing', 
+  VISITED: 'visited',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length === 0) return false
@@ -19,7 +16,6 @@ export function canRun(nodes, edges, startNode) {
   return true
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
@@ -51,7 +47,6 @@ BFS concluído`,
 
 }
 
-// ─── EXECUÇÃO DO BFS ──────────────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
 

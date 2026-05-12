@@ -1,13 +1,11 @@
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',   // preto
-  IN_QUEUE: 'inQueue',      // cinza — candidato
-  PROCESSING: 'processing', // laranja — sendo avaliado agora
-  VISITED: 'visited',       // azul — já processado
-  CONFIRMED: 'confirmed',   // verde — melhor caminho confirmado
-  REJECTED: 'rejected',     // vermelho — não faz parte do caminho
+  UNVISITED: 'unvisited',
+  IN_QUEUE: 'inQueue',
+  PROCESSING: 'processing',
+  VISITED: 'visited',
+  CONFIRMED: 'confirmed',
+  REJECTED: 'rejected',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 2) return false
@@ -24,39 +22,35 @@ export function canRun(nodes, edges, startNode) {
   return true
 }
 
-// ─── PSEUDOCÓDIGO ─────────────────────────────────────────────────
-
 export const pseudocode = {
   init:
-`Dijkstra(Grafo, nó_inicial)
+    `Dijkstra(Grafo, nó_inicial)
   para cada nó
     dist[nó] = infinito
   dist[nó_inicial] = 0
   fila = todos os nós`,
 
   pick:
-`atual = nó não visitado com menor dist
+    `atual = nó não visitado com menor dist
   marcar atual como visitado`,
 
   evaluate:
-`avaliando aresta (atual, v)
+    `avaliando aresta (atual, v)
   dist[atual] + w`,
 
   relax:
-`dist[atual] + w < dist[v]
+    `dist[atual] + w < dist[v]
   dist[v] = dist[atual] + w
   predecessor[v] = atual`,
 
   noRelax:
-`dist[atual] + w >= dist[v]
+    `dist[atual] + w >= dist[v]
   não atualiza`,
 
   done:
-`todos os nós processados
+    `todos os nós processados
 Dijkstra concluído`,
 }
-
-// ─── EXECUÇÃO ─────────────────────────────────────────────────────
 
 export function run(nodes, edges, startNodeId) {
   const steps = []

@@ -7,24 +7,24 @@ import { Box } from '@mui/material'
 
 function Home() {
   return (
-<Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
 
-  <Navbar />
+      <Navbar />
 
-  <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
+      <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
-    <GraphToolbar />
+        <GraphToolbar />
 
-    <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0, mx: 1 }}>
-      <GraphCanvas />
-      <StatusBar />
+        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0, mx: 1 }}>
+          <GraphCanvas />
+          <StatusBar />
+        </Box>
+
+        <AlgorithmsBar />
+
+      </Box>
+
     </Box>
-
-    <AlgorithmsBar />
-
-  </Box>
-
-</Box>
   )
 }
 

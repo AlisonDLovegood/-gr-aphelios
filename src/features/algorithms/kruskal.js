@@ -1,11 +1,9 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',    // preto
-  PROCESSING: 'processing',  // laranja — sendo avaliado
-  IN_TREE: 'inTree',         // verde — confirmado na árvore
+  UNVISITED: 'unvisited',
+  PROCESSING: 'processing',
+  IN_TREE: 'inTree',
 }
 
-// ─── UNION-FIND ───────────────────────────────────────────────────
 function makeUnionFind(nodes) {
   const parent = {}
   const rank = {}
@@ -29,8 +27,6 @@ function makeUnionFind(nodes) {
   return { find, union }
 }
 
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
-
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 2) return false
   if (startNode === null) return false
@@ -52,31 +48,29 @@ export function canRun(nodes, edges, startNode) {
   return visited.size === nodes.length
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
-`Kruskal(Grafo)
+    `Kruskal(Grafo)
   ordenar todas as arestas por peso crescente
   para cada nó — criar componente individual`,
 
   evaluateEdge:
-`para cada aresta em ordem de peso
+    `para cada aresta em ordem de peso
   se os dois nós estão em componentes diferentes
     adicionar aresta à árvore
     unir os dois componentes`,
 
   rejectEdge:
-`aresta rejeitada — formaria ciclo
+    `aresta rejeitada — formaria ciclo
   os dois nós já estão no mesmo componente`,
 
   done:
-`todos os nós conectados
+    `todos os nós conectados
 árvore geradora mínima concluída`,
 
 }
 
-// ─── EXECUÇÃO DO KRUSKAL ──────────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
   const nodeStates = {}

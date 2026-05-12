@@ -2,20 +2,16 @@ import { create } from 'zustand'
 
 const useGraphStore = create((set, get) => ({
 
-  // ─── ESTRUTURA DO GRAFO ───────────────────────────────────────────
   nodes: [],
   edges: [],
   directed: false,
   weighted: false,
 
-  // ─── CONTADORES — nunca decrementam, garantem ids únicos ──────────
   nodeCounter: 0,
   edgeCounter: 0,
 
-  // ─── FERRAMENTA ATIVA ─────────────────────────────────────────────
   activeTool: 'select',
 
-  // ─── ALGORITMOS ───────────────────────────────────────────────────
   selectedAlgorithm: null,
   isRunning: false,
   currentStep: 0,

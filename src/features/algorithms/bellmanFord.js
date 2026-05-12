@@ -1,11 +1,9 @@
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',   // preto
-  IN_QUEUE: 'inQueue',      // cinza — vizinho revelado
-  PROCESSING: 'processing', // laranja — sendo avaliado agora
-  CONFIRMED: 'confirmed',   // verde — melhor distância confirmada
+  UNVISITED: 'unvisited',
+  IN_QUEUE: 'inQueue',
+  PROCESSING: 'processing',
+  CONFIRMED: 'confirmed',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 2) return false
@@ -39,37 +37,33 @@ export function canRun(nodes, edges, startNode) {
   return true
 }
 
-// ─── PSEUDOCÓDIGO ─────────────────────────────────────────────────
-
 export const pseudocode = {
   init:
-`BellmanFord(Grafo, nó_inicial)
+    `BellmanFord(Grafo, nó_inicial)
   para cada nó
     dist[nó] = infinito
   dist[nó_inicial] = 0`,
 
   source:
-`para cada nó u com dist[u] conhecido
+    `para cada nó u com dist[u] conhecido
   avaliar vizinhos de u`,
 
   evaluate:
-`avaliando aresta (u, v)
+    `avaliando aresta (u, v)
   dist[u] + w`,
 
   relax:
-`dist[u] + w < dist[v]
+    `dist[u] + w < dist[v]
   dist[v] = dist[u] + w`,
 
   noRelax:
-`dist[u] + w >= dist[v]
+    `dist[u] + w >= dist[v]
   não atualiza`,
 
   done:
-`BellmanFord concluído
+    `BellmanFord concluído
 distâncias mínimas encontradas`,
 }
-
-// ─── HELPERS ──────────────────────────────────────────────────────
 
 function mkStep(nodeStates, dist, pseudo, currentEdge, confirmedEdges, rejectedEdges) {
   return {
@@ -94,8 +88,6 @@ function outEdges(edges, sourceId) {
 function neighborId(edge, sourceId) {
   return edge.source === sourceId ? edge.target : edge.source
 }
-
-// ─── EXECUÇÃO ─────────────────────────────────────────────────────
 
 export function run(nodes, edges, startNodeId) {
   const steps = []

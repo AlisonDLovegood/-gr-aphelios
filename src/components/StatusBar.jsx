@@ -12,10 +12,10 @@ function StatusBar() {
     isWeighted,
     isComplete,
     isRegular,
-    isConnected,
-    isAcyclic,
-    isTree,
-    isBipartite,
+    // isConnected,
+    // isAcyclic,
+    // isTree,
+    // isBipartite,
   } = useGraphAnalysis()
 
   const statusItems = [
@@ -25,10 +25,10 @@ function StatusBar() {
     { label: 'Ponderado', value: isWeighted ? 'Sim' : 'Não' },
     { label: 'Completo', value: isComplete ? 'Sim' : 'Não' },
     { label: 'Regular', value: isRegular ? 'Sim' : 'Não' },
-    { label: 'Conexo', value: isConnected ? 'Sim' : 'Não' },
-    { label: 'Acíclico', value: isAcyclic ? 'Sim' : 'Não' },
-    { label: 'Árvore', value: isTree ? 'Sim' : 'Não' },
-    { label: 'Bipartido', value: isBipartite ? 'Sim' : 'Não' },
+    // { label: 'Conexo', value: isConnected ? 'Sim' : 'Não' },
+    // { label: 'Acíclico', value: isAcyclic ? 'Sim' : 'Não' },
+    // { label: 'Árvore', value: isTree ? 'Sim' : 'Não' },
+    // { label: 'Bipartido', value: isBipartite ? 'Sim' : 'Não' },
   ]
 
   return (

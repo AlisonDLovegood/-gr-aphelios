@@ -4,20 +4,14 @@ function useGraphAnalysis() {
     const nodes = useGraphStore((state) => state.nodes)
     const edges = useGraphStore((state) => state.edges)
 
-    // ─── CONTAGENS ────────────────────────────────────────────────────
-
     const nodeCount = nodes.length
     const edgeCount = edges.length
-
-    // ─── CLASSIFICAÇÃO BÁSICA ─────────────────────────────────────────
 
     // dirigido se ao menos uma aresta for direcionada
     const isDirected = edges.some(e => e.directed === true)
 
     // ponderado se ao menos uma aresta tiver peso definido
     const isWeighted = edges.some(e => e.weight !== null)
-
-    // ─── ANÁLISE ESTRUTURAL ───────────────────────────────────────────
 
     // completo — todo par de nós tem aresta entre si
     // fórmula: n*(n-1)/2 para não dirigido
@@ -34,12 +28,12 @@ function useGraphAnalysis() {
         return nodes.every(n => degree(n.id) === firstDegree)
     })()
 
-    // ─── REQUEREM ALGORITMO — implementar quando DFS/BFS estiver pronto ───
+    // ─── DESENVOLVIMENTO FUTURO ───
 
-    const isConnected = false
-    const isAcyclic = false
-    const isTree = false
-    const isBipartite = false
+    // const isConnected = false
+    // const isAcyclic = false
+    // const isTree = false
+    // const isBipartite = false
 
     return {
         nodeCount,
@@ -48,10 +42,10 @@ function useGraphAnalysis() {
         isWeighted,
         isComplete,
         isRegular,
-        isConnected,
-        isAcyclic,
-        isTree,
-        isBipartite,
+        // isConnected,
+        // isAcyclic,
+        // isTree,
+        // isBipartite,
     }
 }
 

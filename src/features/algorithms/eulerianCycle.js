@@ -1,14 +1,11 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',    // preto
-  IN_QUEUE: 'inQueue',       // cinza — vizinho revelado
-  PROCESSING: 'processing',  // laranja — sendo percorrido
-  VISITED: 'visited',        // azul — já percorrido
-  CONFIRMED: 'confirmed',    // verde — confirmado no circuito
-  REJECTED: 'rejected',      // vermelho — descartado no backtrack
+  UNVISITED: 'unvisited',
+  IN_QUEUE: 'inQueue',
+  PROCESSING: 'processing',
+  VISITED: 'visited',
+  CONFIRMED: 'confirmed',
+  REJECTED: 'rejected',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 2) return false
@@ -38,34 +35,32 @@ export function canRun(nodes, edges, startNode) {
   return true
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
-`Euleriano(Grafo, nó_inicial)
+    `Euleriano(Grafo, nó_inicial)
   circuito = [nó_inicial]
   nó_atual = nó_inicial`,
 
   traverse:
-`escolher aresta não visitada de nó_atual
+    `escolher aresta não visitada de nó_atual
   verificar se aresta é válida no sentido atual
   marcar aresta como visitada
   nó_atual = outro extremo da aresta
   adicionar nó_atual ao circuito`,
 
   backtrack:
-`sem arestas válidas no nó_atual
+    `sem arestas válidas no nó_atual
   retornar ao nó anterior
   tentar outro caminho`,
 
   done:
-`nó_atual == nó_inicial
+    `nó_atual == nó_inicial
 todas as arestas visitadas
 circuito euleriano concluído`,
 
 }
 
-// ─── EXECUÇÃO DO EULERIANO ────────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
   const nodeStates = {}

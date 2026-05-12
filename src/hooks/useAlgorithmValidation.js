@@ -22,10 +22,10 @@ function useAlgorithmValidation() {
     { id: 'hamiltonian', label: 'Caminho Hamiltoniano', canRun: hamilCanRun(nodes, edges, startNode), run: () => hamilRun(nodes, edges, startNode) },
     { id: 'eulerian', label: 'Caminho Euleriano', canRun: eulerCanRun(nodes, edges, startNode), run: () => eulerRun(nodes, edges, startNode) },
     { id: 'prim', label: 'Prim', canRun: primCanRun(nodes, edges, startNode), run: () => primRun(nodes, edges, startNode) },
-    { id: 'kruskal', label: 'Kruskal', canRun: kruskalCanRun(nodes, edges, startNode), run: () => kruskalRun(nodes, edges, startNode) },  
-    { id: 'bellmanFord', label: 'Bellman-Ford', canRun: bfCanRun(nodes, edges, startNode), run: () => bfRun(nodes, edges, startNode) },  
-    { id: 'dijkstra', label: 'Dijkstra', canRun: dijkstraCanRun(nodes, edges, startNode), run: () => dijkstraRun(nodes, edges, startNode) },  
-    { id: 'floydWarshall', label: 'Floyd-Warshall', canRun: fwCanRun(nodes, edges, startNode), run: () => fwRun(nodes, edges, startNode) },  
+    { id: 'kruskal', label: 'Kruskal', canRun: kruskalCanRun(nodes, edges, startNode), run: () => kruskalRun(nodes, edges, startNode) },
+    { id: 'bellmanFord', label: 'Bellman-Ford', canRun: bfCanRun(nodes, edges, startNode), run: () => bfRun(nodes, edges, startNode) },
+    { id: 'dijkstra', label: 'Dijkstra', canRun: dijkstraCanRun(nodes, edges, startNode), run: () => dijkstraRun(nodes, edges, startNode) },
+    { id: 'floydWarshall', label: 'Floyd-Warshall', canRun: fwCanRun(nodes, edges, startNode), run: () => fwRun(nodes, edges, startNode) },
   ]
 }
 

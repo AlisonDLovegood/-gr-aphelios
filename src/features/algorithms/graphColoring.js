@@ -1,16 +1,13 @@
-// ─── CORES DE COLORAÇÃO ───────────────────────────────────────────
 export const COLORS = [
-  '#a71100',
-  '#005c99',
-  '#009b40',
-  '#5e0083',
-  '#c57a00',
-  '#008066',
-  '#ff6196',
-  '#88d7ff',
+  '#fbff00',
+  '#00ccff',
+  '#00ff6a',
+  '#b700ff',
+  '#ff9d00',
+  '#ff0000',
+  '#ff00f2',
+  '#0011ff',
 ]
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges) {
   if (nodes.length === 0) return false
@@ -18,32 +15,30 @@ export function canRun(nodes, edges) {
   return true
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
-`Coloração(Grafo)
+    `Coloração(Grafo)
   para cada nó de Grafo
     nó.cor = indefinida`,
 
   evaluateNode:
-`nó_atual = próximo nó não colorido
+    `nó_atual = próximo nó não colorido
   cores_usadas = {}
   para cada vizinho de nó_atual
     se vizinho.cor != indefinida
       cores_usadas.adicionar(vizinho.cor)`,
 
   colorNode:
-`cor = primeira cor não presente em cores_usadas
+    `cor = primeira cor não presente em cores_usadas
   nó_atual.cor = cor`,
 
   done:
-`todos os nós coloridos
+    `todos os nós coloridos
 Coloração concluída`,
 
 }
 
-// ─── EXECUÇÃO DA COLORAÇÃO ────────────────────────────────────────
 export function run(nodes, edges) {
   const steps = []
   const nodeStates = {}

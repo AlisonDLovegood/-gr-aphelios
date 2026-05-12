@@ -1,14 +1,11 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',    // preto
-  IN_QUEUE: 'inQueue',       // cinza — vizinho revelado
-  IN_PATH: 'inPath',         // laranja — nó atual no caminho
-  VISITED: 'visited',        // azul — no caminho mas não é o atual
-  CONFIRMED: 'confirmed',    // verde — confirmado no ciclo
-  REJECTED: 'rejected',      // vermelho — descartado no backtrack
+  UNVISITED: 'unvisited',
+  IN_QUEUE: 'inQueue',
+  IN_PATH: 'inPath',
+  VISITED: 'visited',
+  CONFIRMED: 'confirmed',
+  REJECTED: 'rejected',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 3) return false
@@ -48,7 +45,6 @@ export function canRun(nodes, edges, startNode) {
   return backtrack()
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
@@ -81,7 +77,6 @@ export const pseudocode = {
 
 }
 
-// ─── UTILITÁRIO — atualiza estados do path ────────────────────────
 function updatePathStates(nodeStates, path) {
   path.forEach((id, idx) => {
     if (idx === path.length - 1) {
@@ -92,7 +87,6 @@ function updatePathStates(nodeStates, path) {
   })
 }
 
-// ─── EXECUÇÃO DO HAMILTONIANO ─────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
   const nodeStates = {}

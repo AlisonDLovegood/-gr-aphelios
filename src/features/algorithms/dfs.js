@@ -1,12 +1,9 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',   // preto
-  IN_QUEUE: 'inQueue',      // cinza — na pilha
-  PROCESSING: 'processing', // laranja — sendo processado
-  VISITED: 'visited',       // azul — já visitado
+  UNVISITED: 'unvisited',
+  IN_QUEUE: 'inQueue',
+  PROCESSING: 'processing',
+  VISITED: 'visited',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length === 0) return false
@@ -19,11 +16,10 @@ export function canRun(nodes, edges, startNode) {
   return true
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
-`DFS(Grafo, nó_inicial)
+    `DFS(Grafo, nó_inicial)
   para cada nó de Grafo exceto nó_inicial
     nó.estado = não_visitado
     nó.distancia = infinito
@@ -34,25 +30,24 @@ export const pseudocode = {
   empilhar(pilha, nó_inicial)`,
 
   pop:
-`atual = desempilhar(pilha)`,
+    `atual = desempilhar(pilha)`,
 
   neighbor:
-`para cada vizinho de atual
+    `para cada vizinho de atual
   se vizinho.estado == não_visitado
     vizinho.estado = na_pilha
     vizinho.distancia = atual.distancia + 1
     empilhar(pilha, vizinho)`,
 
   finishNode:
-`atual.estado = visitado`,
+    `atual.estado = visitado`,
 
   done:
-`pilha está vazia
+    `pilha está vazia
 DFS concluído`,
 
 }
 
-// ─── EXECUÇÃO DO DFS ──────────────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
 

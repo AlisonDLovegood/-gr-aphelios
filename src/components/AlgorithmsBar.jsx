@@ -19,11 +19,11 @@ import useAlgorithmValidation from '../hooks/useAlgorithmValidation'
 
 
 function AlgorithmsBar() {
+
   const selectedAlgorithm = useGraphStore((state) => state.selectedAlgorithm)
   const isRunning = useGraphStore((state) => state.isRunning)
   const currentStep = useGraphStore((state) => state.currentStep)
   const steps = useGraphStore((state) => state.steps)
-
   const setAlgorithm = useGraphStore((state) => state.setAlgorithm)
   const startExecution = useGraphStore((state) => state.startExecution)
   const stopExecution = useGraphStore((state) => state.stopExecution)
@@ -47,7 +47,6 @@ function AlgorithmsBar() {
   return (
     <Paper elevation={3} sx={{ width: '25vw', minWidth: '25vw', height: '100%', display: 'flex', flexDirection: 'column', ml: 1 }}>
 
-      {/* SEÇÃO ALGORITMOS */}
       <Box sx={{ overflow: 'auto', p: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 900 }}>
           Algoritmos
@@ -70,7 +69,6 @@ function AlgorithmsBar() {
 
       <Divider sx={{ mt: 'auto' }} />
 
-      {/* SEÇÃO EXECUÇÃO */}
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Typography variant="h6" sx={{ fontWeight: 900 }}>
           Execução

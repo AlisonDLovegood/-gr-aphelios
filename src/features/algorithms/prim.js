@@ -1,12 +1,9 @@
-// ─── ESTADOS VISUAIS ─────────────────────────────────────────────
 export const NODE_STATES = {
-  UNVISITED: 'unvisited',    // preto
-  PROCESSING: 'processing',  // laranja — sendo avaliado agora
-  VISITED: 'visited',        // azul — avaliado mas não escolhido
-  IN_TREE: 'inTree',         // verde — confirmado na árvore
+  UNVISITED: 'unvisited',
+  PROCESSING: 'processing',
+  VISITED: 'visited',
+  IN_TREE: 'inTree',
 }
-
-// ─── VALIDAÇÃO ────────────────────────────────────────────────────
 
 export function canRun(nodes, edges, startNode) {
   if (nodes.length < 2) return false
@@ -29,29 +26,27 @@ export function canRun(nodes, edges, startNode) {
   return visited.size === nodes.length
 }
 
-// ─── PSEUDOCÓDIGO POR STEP ────────────────────────────────────────
 export const pseudocode = {
 
   init:
-`Prim(Grafo, nó_inicial)
+    `Prim(Grafo, nó_inicial)
   árvore = {nó_inicial}
   nó_inicial.estado = na_árvore`,
 
   evaluateEdge:
-`avaliando aresta candidata (u, v)
+    `avaliando aresta candidata (u, v)
   comparando com menor encontrada até agora`,
 
   addToTree:
-`aresta_mínima escolhida
+    `aresta_mínima escolhida
   adicionar nó e aresta à árvore`,
 
   done:
-`todos os nós estão na árvore
+    `todos os nós estão na árvore
 árvore geradora mínima concluída`,
 
 }
 
-// ─── EXECUÇÃO DO PRIM ─────────────────────────────────────────────
 export function run(nodes, edges, startNodeId) {
   const steps = []
   const nodeStates = {}
