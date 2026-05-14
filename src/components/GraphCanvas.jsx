@@ -8,7 +8,7 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import useGraphStore from '../store/GraphStore'
+import useGraphStore from '../store/GraphStore.js'
 
 function GraphCanvas() {
   const activeTool = useGraphStore((state) => state.activeTool)

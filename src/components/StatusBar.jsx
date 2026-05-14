@@ -2,7 +2,7 @@ import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
-import useGraphAnalysis from '../hooks/useGraphAnalysis'
+import useGraphAnalysis from '../hooks/useGraphAnalysis.js'
 
 function StatusBar() {
   const {

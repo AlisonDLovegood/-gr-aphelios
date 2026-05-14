@@ -5,7 +5,7 @@ import LinearScaleIcon from '@mui/icons-material/LinearScale'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import PanToolIcon from '@mui/icons-material/PanTool'
 import Typography from '@mui/material/Typography';
-import useGraphStore from '../store/GraphStore'
+import useGraphStore from '../store/GraphStore.js'
 
 
 const tools = [

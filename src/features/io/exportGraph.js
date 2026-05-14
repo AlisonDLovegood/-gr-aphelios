@@ -1,4 +1,4 @@
-import useGraphStore from '../../store/GraphStore'
+import useGraphStore from '../../store/GraphStore.js'
 
 export function exportGraph() {
   const { nodes, edges } = useGraphStore.getState()

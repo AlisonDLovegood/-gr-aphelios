@@ -20,10 +20,10 @@ import UploadIcon from '@mui/icons-material/Upload';
 import DownloadIcon from '@mui/icons-material/Download';
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { exportGraph } from '../features/io/exportGraph';
-import { exportPNG } from '../features/io/exportPNG';
-import { handleImportGraph } from '../features/io/importGraph';
-import useGraphStore from '../store/GraphStore';
+import { exportGraph } from '../features/io/exportGraph.js';
+import { exportPNG } from '../features/io/exportPNG.js';
+import { handleImportGraph } from '../features/io/importGraph.js';
+import useGraphStore from '../store/GraphStore.js';
 import logo from '../assets/logo-2.png';
 
 const academyItems = ['Monografia', 'GitHub'];

@@ -1,8 +1,8 @@
-import Navbar from '../components/Navbar'
-import GraphToolbar from '../components/GraphToolBar'
-import StatusBar from '../components/StatusBar'
-import GraphCanvas from '../components/GraphCanvas'
-import AlgorithmsBar from '../components/AlgorithmsBar'
+import Navbar from '../components/Navbar.jsx'
+import GraphToolbar from '../components/GraphToolBar.jsx'
+import StatusBar from '../components/StatusBar.jsx'
+import GraphCanvas from '../components/GraphCanvas.jsx'
+import AlgorithmsBar from '../components/AlgorithmsBar.jsx'
 import { Box } from '@mui/material'
 
 function Home() {

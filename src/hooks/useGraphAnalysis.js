@@ -1,4 +1,4 @@
-import useGraphStore from '../store/GraphStore'
+import useGraphStore from '../store/GraphStore.js'
 
 function useGraphAnalysis() {
     const nodes = useGraphStore((state) => state.nodes)
