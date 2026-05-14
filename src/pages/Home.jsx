@@ -1,4 +1,4 @@
-import Navbar from '../components/Navbar.jsx'
+import Navbar from '../components/navbar.jsx'
 import GraphToolbar from '../components/GraphToolBar.jsx'
 import StatusBar from '../components/StatusBar.jsx'
 import GraphCanvas from '../components/GraphCanvas.jsx'
